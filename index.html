@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Un regalo pixelado</title>
+    <style>
+        body {
+            background-color: #121212;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+        }
+
+        .container {
+            perspective: 1200px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Contenedor de la flor con interactividad */
+        .flower-wrapper {
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .flower-wrapper:hover {
+            transform: scale(1.1);
+        }
+
+        .flower {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            transform-style: preserve-3d;
+            animation: rotate 10s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotateY(0deg) rotateX(-10deg); }
+            to { transform: rotateY(360deg) rotateX(-10deg); }
+        }
+
+        /* Cartel secreto de Minecraft */
+        .tooltip {
+            position: absolute;
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.85);
+            border: 3px solid #5a5a5a;
+            padding: 8px 15px;
+            color: #ffffff;
+            font-family: 'Courier New', monospace;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.4s ease, top 0.4s ease;
+            pointer-events: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            z-index: 100;
+        }
+
+        .flower-wrapper:hover .tooltip {
+            opacity: 1;
+            top: -80px;
+        }
+
+        /* Cubos (Píxeles 3D) */
+        .pixel {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            transform-style: preserve-3d;
+        }
+
+        .face {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 0.5px solid rgba(0,0,0,0.2);
+        }
+
+        .front  { transform: translateZ(10px); }
+        .back   { transform: rotateY(180deg) translateZ(10px); }
+        .left   { transform: rotateY(-90deg) translateZ(10px); }
+        .right  { transform: rotateY(90deg) translateZ(10px); }
+        .top    { transform: rotateX(90deg) translateZ(10px); }
+        .bottom { transform: rotateX(-90deg) translateZ(10px); }
+
+        /* Colores con degradados para realismo */
+        .red .face      { background: radial-gradient(#ff4d4d, #b30000); }
+        .darkred .face  { background: radial-gradient(#cc0000, #660000); }
+        .green .face    { background: radial-gradient(#45ed45, #1d821d); }
+        .darkgreen .face{ background: radial-gradient(#2eb82e, #0d4d0d); }
+
+        /* Estructura de la flor */
+        .p1 { transform: translate3d(0, 40px, 0); }
+        .p2 { transform: translate3d(0, 20px, 0); }
+        .p3 { transform: translate3d(0, 0px, 0); }
+        .p4 { transform: translate3d(0, -20px, 0); } 
+        .p5 { transform: translate3d(20px, -20px, 0); }
+        .p6 { transform: translate3d(-20px, -20px, 0); }
+        .p7 { transform: translate3d(0, -20px, 20px); }
+        .p8 { transform: translate3d(0, -20px, -20px); }
+        .p9 { transform: translate3d(0, -40px, 0); }
+        .p10 { transform: translate3d(20px, 20px, 0); }
+        .p11 { transform: translate3d(-20px, 10px, 0); }
+
+        h2 {
+            margin-top: 80px;
+            font-weight: 300;
+            letter-spacing: 2px;
+            background: linear-gradient(to right, #ff4d4d, #ff9999);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hint {
+            font-size: 0.8rem;
+            color: #555;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="flower-wrapper">
+            <div class="tooltip">✨ Tú eres muy especial ✨</div>
+            
+            <div class="flower">
+                <div class="pixel green p1"><div class="face front"></div><div class="face back"></div><div class="face left"></div><div class="face right"></div><div class="face top"></div><div class="face bottom"></div></div>
+                <div class="pixel green p2"><div class="face front"></div><div class="face back"></div><div class="face left"></div><div class="face right"></div><div class="face top"></div><div class="face bottom"></div></div>
+                <div class="pixel green p3"><div class="face front"></div><div class="face back"></div><div class="face left"></div><div class="face right"></div><div class="face top"></div><div class="face bottom"></div></div>
+                <div class="pixel darkgreen p10"><div class="face front"></div><div class="face back"></div><div class="face left"></div><div class="face right"></div><div class="face top"></div><div class="face bottom"></div></div>
+                <div class="pixel darkgreen p11"><div class="face front"></div><div class="face back"></div><div class="face left"></div><div class="face right"></div><div class="face top"></div><div class="face bottom"></div></div>
+                <div class="pixel red p4"><div class="face front"></div><div class="face back"></div><div class="face left"></div><div class="face right"></div><div class="face top"></div><div class="face bottom"></div></div>
+                <div class="pixel darkred p5"><div class="face front"></div><div class="face back"></div><div class="face left"></div><div class="face right"></div><div class="face top"></div><div class="face bottom"></div></div>
+                <div class="pixel darkred p6"><div class="face front"></div><div class="face back"></div><div class="face left"></div><div class="face right"></div><div class="face top"></div><div class="face bottom"></div></div>
+                <div class="pixel darkred p7"><div class="face front"></div><div class="face back"></div><div class="face left"></div><div class="face right"></div><div class="face top"></div><div class="face bottom"></div></div>
+                <div class="pixel darkred p8"><div class="face front"></div><div class="face back"></div><div class="face left"></div><div class="face right"></div><div class="face top"></div><div class="face bottom"></div></div>
+                <div class="pixel red p9"><div class="face front"></div><div class="face back"></div><div class="face left"></div><div class="face right"></div><div class="face top"></div><div class="face bottom"></div></div>
+            </div>
+        </div>
+
+        <h2>UNA FLOR PARA OTRA FLOR</h2>
+        <p class="hint">(Pasa el mouse sobre la flor o tócala)</p>
+    </div>
+
+</body>
+</html>
