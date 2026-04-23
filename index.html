@@ -2,158 +2,273 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Un regalo pixelado</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Rosa 3D Minecraft - Optimizada</title>
     <style>
+        :root {
+            --bg-color: #1a1a1a;
+            --bar-color: #ff4d4d;
+        }
+
+        * { box-sizing: border-box; touch-action: none; }
+
         body {
-            background-color: #121212;
+            margin: 0;
+            height: 100vh;
+            background-color: var(--bg-color);
+            color: white;
+            font-family: 'Courier New', monospace;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
             overflow: hidden;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: white;
+            user-select: none;
         }
 
-        .container {
-            perspective: 1200px;
+        /* --- Pantalla de Carga (Loader) --- */
+        #loader {
+            position: absolute;
             text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        /* Contenedor de la flor con interactividad */
-        .flower-wrapper {
-            position: relative;
-            cursor: pointer;
-            transition: transform 0.3s ease;
-        }
-
-        .flower-wrapper:hover {
-            transform: scale(1.1);
-        }
-
-        .flower {
-            position: relative;
-            width: 80px;
-            height: 80px;
-            transform-style: preserve-3d;
-            animation: rotate 10s linear infinite;
-        }
-
-        @keyframes rotate {
-            from { transform: rotateY(0deg) rotateX(-10deg); }
-            to { transform: rotateY(360deg) rotateX(-10deg); }
-        }
-
-        /* Cartel secreto de Minecraft */
-        .tooltip {
-            position: absolute;
-            top: -60px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: rgba(0, 0, 0, 0.85);
-            border: 3px solid #5a5a5a;
-            padding: 8px 15px;
-            color: #ffffff;
-            font-family: 'Courier New', monospace;
-            white-space: nowrap;
-            opacity: 0;
-            transition: opacity 0.4s ease, top 0.4s ease;
-            pointer-events: none;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
             z-index: 100;
+            transition: opacity 0.5s ease;
         }
 
-        .flower-wrapper:hover .tooltip {
-            opacity: 1;
-            top: -80px;
+        #loader h2 { font-weight: 300; margin-bottom: 15px; font-size: 1.2rem; }
+
+        .loading-bar-container {
+            width: 200px; height: 8px;
+            border: 1px solid white;
+            margin: 0 auto;
+            position: relative;
         }
 
-        /* Cubos (Píxeles 3D) */
-        .pixel {
-            position: absolute;
-            width: 20px;
-            height: 20px;
+        #bar {
+            width: 0%; height: 100%;
+            background-color: var(--bar-color);
+            transition: width 0.1s linear;
+        }
+
+        /* --- Contenedor Principal (Scene) --- */
+        .scene {
+            width: 100vw; height: 100vh;
+            perspective: 1000px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        #pivot {
+            position: relative;
             transform-style: preserve-3d;
+            /* Inclinación base para ver el 3D */
+            transform: rotateX(-15deg) rotateY(45deg);
         }
 
-        .face {
+        /* --- La Rosa (Planos Cruzados) --- */
+        .flower-model {
             position: absolute;
-            width: 20px;
-            height: 20px;
-            border: 0.5px solid rgba(0,0,0,0.2);
+            transform-style: preserve-3d;
+            /* Centrar el modelo */
+            margin-left: -64px; /* -(width/2) */
+            margin-top: -128px; /* -height */
         }
 
-        .front  { transform: translateZ(10px); }
-        .back   { transform: rotateY(180deg) translateZ(10px); }
-        .left   { transform: rotateY(-90deg) translateZ(10px); }
-        .right  { transform: rotateY(90deg) translateZ(10px); }
-        .top    { transform: rotateX(90deg) translateZ(10px); }
-        .bottom { transform: rotateX(-90deg) translateZ(10px); }
-
-        /* Colores con degradados para realismo */
-        .red .face      { background: radial-gradient(#ff4d4d, #b30000); }
-        .darkred .face  { background: radial-gradient(#cc0000, #660000); }
-        .green .face    { background: radial-gradient(#45ed45, #1d821d); }
-        .darkgreen .face{ background: radial-gradient(#2eb82e, #0d4d0d); }
-
-        /* Estructura de la flor */
-        .p1 { transform: translate3d(0, 40px, 0); }
-        .p2 { transform: translate3d(0, 20px, 0); }
-        .p3 { transform: translate3d(0, 0px, 0); }
-        .p4 { transform: translate3d(0, -20px, 0); } 
-        .p5 { transform: translate3d(20px, -20px, 0); }
-        .p6 { transform: translate3d(-20px, -20px, 0); }
-        .p7 { transform: translate3d(0, -20px, 20px); }
-        .p8 { transform: translate3d(0, -20px, -20px); }
-        .p9 { transform: translate3d(0, -40px, 0); }
-        .p10 { transform: translate3d(20px, 20px, 0); }
-        .p11 { transform: translate3d(-20px, 10px, 0); }
-
-        h2 {
-            margin-top: 80px;
-            font-weight: 300;
-            letter-spacing: 2px;
-            background: linear-gradient(to right, #ff4d4d, #ff9999);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        .sprite-plane {
+            position: absolute;
+            width: 128px;   /* Tamaño de la textura */
+            height: 128px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            image-rendering: pixelated; /* ¡Importante para el look Minecraft! */
+            
+            /* Textura de la Rosa de Minecraft (Base64 para que funcione directo) */
+            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAACXBIWXMAAAsTAAALEwEAmpwYAAAFmElEQVR4nO2dS24bORBFT5XkNfX+N5HXSZ6ZQDvAtshigfUfWSTXfRNoXwAVSREfVbLIw5fX19fX4/H4evp8vP5//LxfP96v//vYfS8u4bO8504Z9b3DsbP24b+fNn3e6fNx/ftx+7vff37fS8e4H8VleM7H9p+N3ffmUvf7YdPn477f/t73Pz7v5+Nxu4/77Xff78WleM7H+7b3bOy+N5f6/R475/Hxfj8fN/f9/vV+3O7j3e77vbgez/l43/aejd335lL/vx47Z54eN996eP09buO9/5+4DOfj/9h5/N/fV2P3pbnU/7/v56X7XrqP//v/wXvH7H0vLsdzPt63vWdj97251O//9f//Gv/+Xv//H7x3vPf/E5fhfPwfO4//+//B5945Ue//X///X6Hj6v9/v/f57/jxfj8et/v4t/u4H9fj+774vff3N/Oue/+f4X8/Xur9Px4PxuPx9fT5eP3/+Hm/fry///ex+w4v//3xXrzPj/vX73fOve/Pfev9/Of3XbzPj/vX79fMve/Pffv9v+f3XbzPj/vX77fOfX+f987//N8/v+/ifX7cv36//Xnv+/u8d/7n//75fRfv8+P+9futc9/f573zP//3z++/eJ8f96/f//hZ/f7+59f/ft7v5+Px758fN/vX///+5+N5O5634//6/v3O+/vH5//6/ufjPx+PZ+6499/f/3w8f3zXv8fPvXPfH//5v//v79/v//HjPff3Xfz7e/3///Hjvff3Xfz7e/3///Hjvff3Xfz7e/3///Hjvff3Xfz7e/3///Hjvff3Xfz7f35/8/f3v//xXf8eP/fOfX/85///v7//54//fPzz+y7+ffw//vd3Pn5+f7/z8f///p7//79fX//b59f//vfXP///X//79fP/v//Z95//f3f8//f77+//8//f5+//+//r++//3///n7////4/v//z////v///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z57//+f////f///P//z19M9n4/H5/Xz///v/5/P6+f///v/5/Pv7/v3+u7+P////v4///+//j///7//P/v////n5/3/4');
         }
 
-        .hint {
-            font-size: 0.8rem;
-            color: #555;
-            margin-top: 10px;
+        /* Plano 1: Normal */
+        .p1 { transform: rotateY(0deg); }
+        /* Plano 2: Girado 90 grados para crear la cruz */
+        .p2 { transform: rotateY(90deg); }
+
+        /* --- Texto de Instrucciones --- */
+        #instructions {
+            position: absolute;
+            bottom: 20px;
+            text-align: center;
+            width: 100%;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 1s ease;
         }
+
+        #instructions h1 {
+            color: var(--bar-color);
+            font-size: 1.4rem;
+            margin: 0 0 5px 0;
+            font-weight: bold;
+        }
+
+        #instructions p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="flower-wrapper">
-            <div class="tooltip">✨ Tú eres muy especial ✨</div>
-            
-            <div class="flower">
-                <div class="pixel green p1"><div class="face front"></div><div class="face back"></div><div class="face left"></div><div class="face right"></div><div class="face top"></div><div class="face bottom"></div></div>
-                <div class="pixel green p2"><div class="face front"></div><div class="face back"></div><div class="face left"></div><div class="face right"></div><div class="face top"></div><div class="face bottom"></div></div>
-                <div class="pixel green p3"><div class="face front"></div><div class="face back"></div><div class="face left"></div><div class="face right"></div><div class="face top"></div><div class="face bottom"></div></div>
-                <div class="pixel darkgreen p10"><div class="face front"></div><div class="face back"></div><div class="face left"></div><div class="face right"></div><div class="face top"></div><div class="face bottom"></div></div>
-                <div class="pixel darkgreen p11"><div class="face front"></div><div class="face back"></div><div class="face left"></div><div class="face right"></div><div class="face top"></div><div class="face bottom"></div></div>
-                <div class="pixel red p4"><div class="face front"></div><div class="face back"></div><div class="face left"></div><div class="face right"></div><div class="face top"></div><div class="face bottom"></div></div>
-                <div class="pixel darkred p5"><div class="face front"></div><div class="face back"></div><div class="face left"></div><div class="face right"></div><div class="face top"></div><div class="face bottom"></div></div>
-                <div class="pixel darkred p6"><div class="face front"></div><div class="face back"></div><div class="face left"></div><div class="face right"></div><div class="face top"></div><div class="face bottom"></div></div>
-                <div class="pixel darkred p7"><div class="face front"></div><div class="face back"></div><div class="face left"></div><div class="face right"></div><div class="face top"></div><div class="face bottom"></div></div>
-                <div class="pixel darkred p8"><div class="face front"></div><div class="face back"></div><div class="face left"></div><div class="face right"></div><div class="face top"></div><div class="face bottom"></div></div>
-                <div class="pixel red p9"><div class="face front"></div><div class="face back"></div><div class="face left"></div><div class="face right"></div><div class="face top"></div><div class="face bottom"></div></div>
-            </div>
+    <div id="loader">
+        <h2 id="status">Generando mundo...</h2>
+        <div class="loading-bar-container">
+            <div id="bar"></div>
         </div>
-
-        <h2>UNA FLOR PARA OTRA FLOR</h2>
-        <p class="hint">(Pasa el mouse sobre la flor o tócala)</p>
     </div>
 
+    <div class="scene" id="mainScene">
+        <div id="pivot">
+            <div class="flower-model">
+                <div class="sprite-plane p1"></div>
+                <div class="sprite-plane p2"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="instructions">
+        <h1>UNA ROSA PARA TI</h1>
+        <p>Arrastra para girar</p>
+    </div>
+
+    <script>
+        // --- Elementos del DOM ---
+        const dom = {
+            loader: document.getElementById('loader'),
+            bar: document.getElementById('bar'),
+            status: document.getElementById('status'),
+            scene: document.getElementById('mainScene'),
+            pivot: document.getElementById('pivot'),
+            instructions: document.getElementById('instructions')
+        };
+
+        // --- Configuración de Rotación ---
+        let targetRotY = 45;
+        let targetRotX = -15;
+        let currentRotY = 45;
+        let currentRotX = -15;
+        
+        // Sensibilidad táctil/mouse
+        const sensitivity = 0.5; 
+        // Suavizado (0.01 a 1, más bajo es más suave/lento)
+        const smoothness = 0.15; 
+
+        // --- Simulación de Carga (5 segundos) ---
+        function simulateLoading() {
+            let progress = 0;
+            const startTime = Date.now();
+            const duration = 5000; // 5 segundos
+
+            const phrases = [
+                "Generando terreno...",
+                "Buscando el bioma perfecto...",
+                "Plantando pixeles...",
+                "Crafteando pétalos..."
+            ];
+
+            const interval = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                progress = (elapsed / duration) * 100;
+
+                if (progress >= 100) {
+                    dom.bar.style.width = '100%';
+                    dom.status.innerText = "¡Lista!";
+                    clearInterval(interval);
+                    setTimeout(showScene, 500);
+                } else {
+                    dom.bar.style.width = progress + '%';
+                    // Cambiar frase aleatoriamente
+                    if (Math.random() > 0.95) {
+                        dom.status.innerText = phrases[Math.floor(Math.random() * phrases.length)];
+                    }
+                }
+            }, 50);
+        }
+
+        // --- Mostrar la Escena ---
+        function showScene() {
+            dom.loader.style.opacity = '0';
+            setTimeout(() => {
+                dom.loader.remove();
+                dom.scene.style.opacity = '1';
+                dom.instructions.style.opacity = '1';
+                // Iniciar el bucle de renderizado
+                requestAnimationFrame(updateRotation);
+            }, 500);
+        }
+
+        // --- Lógica de Interacción (Mouse y Táctil) ---
+        let isDragging = false;
+        let lastX = 0;
+        let lastY = 0;
+
+        // Manejadores unificados
+        function onStart(e) {
+            isDragging = true;
+            lastX = e.pageX || (e.touches && e.touches[0].pageX);
+            lastY = e.pageY || (e.touches && e.touches[0].pageY);
+        }
+
+        function onMove(e) {
+            if (!isDragging) return;
+            
+            const currentX = e.pageX || (e.touches && e.touches[0].pageX);
+            const currentY = e.pageY || (e.touches && e.touches[0].pageY);
+            
+            const deltaX = currentX - lastX;
+            const deltaY = currentY - lastY;
+
+            targetRotY += deltaX * sensitivity;
+            targetRotX -= deltaY * sensitivity; // Invertido para que se sienta natural
+
+            // Limitar rotación vertical para no "dar la vuelta"
+            targetRotX = Math.max(-60, Math.min(60, targetRotX));
+
+            lastX = currentX;
+            lastY = currentY;
+        }
+
+        function onEnd() {
+            isDragging = false;
+        }
+
+        // Eventos de Mouse
+        window.addEventListener('mousedown', onStart);
+        window.addEventListener('mousemove', onMove);
+        window.addEventListener('mouseup', onEnd);
+
+        // Eventos Táctiles (móvil)
+        window.addEventListener('touchstart', onStart, { passive: false });
+        window.addEventListener('touchmove', onMove, { passive: false });
+        window.addEventListener('touchend', onEnd);
+
+
+        // --- Bucle de Renderizado (Suavizado con Lerp) ---
+        function updateRotation() {
+            // Interpolación lineal (Lerp) para suavizar
+            currentRotY += (targetRotY - currentRotY) * smoothness;
+            currentRotX += (targetRotX - currentRotX) * smoothness;
+
+            // Aplicar transformación al pivot
+            dom.pivot.style.transform = `rotateX(${currentRotX}deg) rotateY(${currentRotY}deg)`;
+
+            // Siguiente frame
+            requestAnimationFrame(updateRotation);
+        }
+
+        // Iniciar todo
+        simulateLoading();
+
+    </script>
 </body>
 </html>
