@@ -3,207 +3,191 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rosa 3D - Generación Activa</title>
+    <title>Para Mi Amor</title>
     <style>
         :root {
-            --bg: #050505;
-            --rose-red: #ff002b;
-            --stem-green: #1a7431;
+            --rose-color: #ff1a4a;
+            --rose-dark: #b3002d;
+            --glow: #ff4d79;
         }
 
         body {
-            background-color: var(--bg);
             margin: 0;
             height: 100vh;
+            background: radial-gradient(circle at center, #1a050d 0%, #050505 100%);
             display: flex;
             justify-content: center;
             align-items: center;
             overflow: hidden;
-            font-family: 'Courier New', monospace;
-            perspective: 1000px;
+            font-family: 'Georgia', serif;
         }
 
-        /* Pantalla de carga */
-        #loader {
+        /* Estrellas de fondo */
+        .stars {
             position: absolute;
-            color: white;
-            text-align: center;
-            z-index: 100;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            z-index: 0;
         }
 
-        .scene {
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transform-style: preserve-3d;
-        }
-
-        #pivot {
+        /* Contenedor de la Rosa */
+        .flower {
             position: relative;
-            transform-style: preserve-3d;
-            transform: rotateX(-20deg) rotateY(45deg);
-            will-change: transform;
+            transform: scale(1.2);
+            filter: drop-shadow(0 0 15px var(--glow));
+            animation: float 4s ease-in-out infinite;
         }
 
-        .pixel {
+        @keyframes float {
+            0%, 100% { transform: translateY(0) scale(1.2) rotate(-2deg); }
+            50% { transform: translateY(-20px) scale(1.25) rotate(2deg); }
+        }
+
+        /* Pétalos */
+        .petal {
             position: absolute;
-            width: 8px;
-            height: 8px;
-            transform-style: preserve-3d;
-            will-change: transform;
+            background: linear-gradient(45deg, var(--rose-dark), var(--rose-color));
+            border-radius: 50% 50% 10% 80%;
+            opacity: 0.9;
+            transform-origin: bottom center;
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
-        .face {
+        .center {
+            width: 40px;
+            height: 40px;
+            background: var(--rose-dark);
+            border-radius: 50%;
             position: absolute;
-            width: 8px;
-            height: 8px;
-            backface-visibility: hidden; /* Optimización clave */
+            top: -20px;
+            left: -20px;
+            z-index: 10;
+            box-shadow: inset 0 0 10px #000;
         }
 
-        /* Caras simplificadas para rendimiento */
-        .f { transform: translateZ(4px); background: rgba(0,0,0,0.3); }
-        .t { transform: rotateX(90deg) translateZ(4px); }
-
-        .ui-text {
+        /* Tallo */
+        .stem {
+            width: 8px;
+            height: 300px;
+            background: linear-gradient(to bottom, #1a4d1a, #0a290a);
             position: absolute;
             top: 20px;
+            left: -4px;
+            border-radius: 0 0 4px 4px;
+            z-index: -1;
+        }
+
+        .leaf {
+            position: absolute;
+            width: 40px;
+            height: 20px;
+            background: linear-gradient(to right, #1a4d1a, #2d7a2d);
+            border-radius: 0 100% 0 100%;
+            top: 100px;
+            left: 5px;
+            transform-origin: left;
+            animation: breeze 3s ease-in-out infinite;
+        }
+
+        .leaf.right {
+            left: -40px;
+            transform: scaleX(-1);
+            top: 150px;
+        }
+
+        @keyframes breeze {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(10deg); }
+        }
+
+        /* Texto */
+        .dedication {
+            position: absolute;
+            bottom: 50px;
             color: white;
             text-align: center;
-            pointer-events: none;
-            text-shadow: 0 0 15px var(--rose-red);
-            z-index: 10;
+            width: 100%;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            font-size: 1.2rem;
+            text-shadow: 0 0 10px var(--glow);
+            opacity: 0;
+            animation: fadeIn 3s forwards 2s;
         }
 
-        #bar-container {
-            width: 250px;
-            height: 4px;
-            background: #222;
-            margin-top: 15px;
+        @keyframes fadeIn {
+            to { opacity: 1; }
         }
 
-        #bar {
-            width: 0%;
-            height: 100%;
-            background: var(--rose-red);
-            box-shadow: 0 0 10px var(--rose-red);
-        }
     </style>
 </head>
 <body>
 
-    <div id="loader">
-        <h2 id="status">INICIALIZANDO MUNDO...</h2>
-        <div id="bar-container"><div id="bar"></div></div>
+    <div class="stars" id="starField"></div>
+
+    <div class="flower" id="rose">
+        <div class="stem">
+            <div class="leaf"></div>
+            <div class="leaf right"></div>
+        </div>
+        <div class="center"></div>
     </div>
 
-    <div class="ui-text" id="instructions" style="display:none;">
-        <h1>PARA TI</h1>
-        <p>Arrastra para rotar la rosa</p>
+    <div class="dedication">
+        Eres la flor más bella de mi jardín
     </div>
 
-    <div class="scene">
-        <div id="pivot"></div>
-    </div>
+    <script>
+        const rose = document.getElementById('rose');
+        const starField = document.getElementById('starField');
 
-<script>
-    const pivot = document.getElementById('pivot');
-    const loader = document.getElementById('loader');
-    const bar = document.getElementById('bar');
-    const instructions = document.getElementById('instructions');
-
-    let rotY = 45;
-    let rotX = -20;
-
-    // Función para crear bloques optimizados
-    function createPixel(x, y, z, color) {
-        const pixel = document.createElement('div');
-        pixel.className = 'pixel';
-        pixel.style.transform = `translate3d(${x}px, ${y}px, ${z}px) scale(0)`;
-        
-        // Solo creamos 2 caras por cubo para que 1000 bloques no maten el PC
-        // Pero se ve como un bloque sólido por el ángulo
-        const faces = ['f', 't']; 
-        faces.forEach(f => {
-            const div = document.createElement('div');
-            div.className = `face ${f}`;
-            div.style.backgroundColor = color;
-            pixel.appendChild(div);
-        });
-
-        pivot.appendChild(pixel);
-        
-        // Animación suave de entrada
-        requestAnimationFrame(() => {
-            pixel.style.transition = "transform 0.6s cubic-bezier(0.17, 0.67, 0.83, 0.67)";
-            pixel.style.transform = `translate3d(${x}px, ${y}px, ${z}px) scale(1)`;
-        });
-    }
-
-    async function build() {
-        // 1. Fase de espera (5 segundos)
-        let progress = 0;
-        const interval = setInterval(() => {
-            progress += 1;
-            bar.style.width = progress + "%";
-            if(progress >= 100) clearInterval(interval);
-        }, 50);
-
-        await new Promise(r => setTimeout(r, 5000));
-        
-        // 2. Transición
-        loader.style.display = "none";
-        instructions.style.display = "block";
-
-        // 3. Construcción del Tallo
-        for (let i = 0; i < 20; i++) {
-            createPixel(0, 160 - (i * 8), 0, 'var(--stem-green)');
-            await new Promise(r => setTimeout(r, 40));
+        // Crear pétalos de forma procedural
+        for (let i = 0; i < 30; i++) {
+            const petal = document.createElement('div');
+            petal.className = 'petal';
+            
+            const size = 100 - (i * 2);
+            const rotation = i * 45;
+            const delay = i * 0.1;
+            
+            petal.style.width = `${size}px`;
+            petal.style.height = `${size}px`;
+            petal.style.top = `-${size/2}px`;
+            petal.style.left = `-${size/2}px`;
+            petal.style.transform = `rotate(${rotation}deg) scale(0)`;
+            petal.style.animation = `bloom 1.5s ease-out ${delay}s forwards`;
+            
+            rose.appendChild(petal);
         }
 
-        // 4. Construcción de la Gran Rosa (1000 bloques en ráfagas)
-        for (let i = 0; i < 1000; i++) {
-            const angle = 0.2 * i;
-            const r = 1.2 * Math.sqrt(i);
-            const x = r * Math.cos(angle) * 8;
-            const z = r * Math.sin(angle) * 8;
-            const y = - (i / 15) + (r * r * 0.02);
-
-            const red = 200 + Math.random() * 55;
-            createPixel(x, y, z, `rgb(${red}, 10, 40)`);
-
-            // Cada 20 bloques, damos un respiro al navegador para que no se trabe
-            if (i % 20 === 0) await new Promise(r => setTimeout(r, 10));
+        // Crear estrellas
+        for (let i = 0; i < 100; i++) {
+            const star = document.createElement('div');
+            star.style.position = 'absolute';
+            star.style.width = '2px';
+            star.style.height = '2px';
+            star.style.background = 'white';
+            star.style.borderRadius = '50%';
+            star.style.top = Math.random() * 100 + 'vh';
+            star.style.left = Math.random() * 100 + 'vw';
+            star.style.opacity = Math.random();
+            starField.appendChild(star);
         }
-    }
 
-    // Interacción de rotación
-    let isDragging = false;
-    let pX, pY;
+        // Estilo de la animación de florecer
+        const styleSheet = document.createElement("style");
+        styleSheet.innerText = `
+            @keyframes bloom {
+                to { transform: rotate(var(--rot)) scale(1) translateY(-10px); }
+            }
+        `;
+        document.head.appendChild(styleSheet);
 
-    document.addEventListener('mousedown', e => { isDragging = true; pX = e.clientX; pY = e.clientY; });
-    document.addEventListener('mousemove', e => {
-        if (!isDragging) return;
-        rotY += (e.clientX - pX) * 0.5;
-        rotX -= (e.clientY - pY) * 0.5;
-        pivot.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
-        pX = e.clientX; pY = e.clientY;
-    });
-    document.addEventListener('mouseup', () => isDragging = false);
-
-    // Soporte Táctil
-    document.addEventListener('touchstart', e => { isDragging = true; pX = e.touches[0].clientX; pY = e.touches[0].clientY; });
-    document.addEventListener('touchmove', e => {
-        if (!isDragging) return;
-        rotY += (e.touches[0].clientX - pX) * 0.5;
-        rotX -= (e.touches[0].clientY - pY) * 0.5;
-        pivot.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
-        pX = e.touches[0].clientX; pY = e.touches[0].clientY;
-    });
-    document.addEventListener('touchend', () => isDragging = false);
-
-    window.onload = build;
-</script>
+        // Aplicar la rotación individual a cada pétalo
+        document.querySelectorAll('.petal').forEach((p, index) => {
+            p.style.setProperty('--rot', `${index * 25}deg`);
+        });
+    </script>
 </body>
 </html>
