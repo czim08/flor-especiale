@@ -3,191 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Para Mi Amor</title>
+    <title>Rosa Pixelada en Construcción</title>
     <style>
         :root {
-            --rose-color: #ff1a4a;
-            --rose-dark: #b3002d;
-            --glow: #ff4d79;
+            --bg: #0a0a0a;
+            --rose-red: #e63946;
+            --leaf-green: #2b9348;
+            --stem-green: #004b23;
         }
 
         body {
+            background-color: var(--bg);
             margin: 0;
             height: 100vh;
-            background: radial-gradient(circle at center, #1a050d 0%, #050505 100%);
             display: flex;
             justify-content: center;
             align-items: center;
             overflow: hidden;
-            font-family: 'Georgia', serif;
+            font-family: 'Courier New', monospace;
+            touch-action: none;
         }
 
-        /* Estrellas de fondo */
-        .stars {
+        /* Pantalla de carga */
+        #loader {
             position: absolute;
-            width: 100%;
-            height: 100%;
-            background: transparent;
-            z-index: 0;
-        }
-
-        /* Contenedor de la Rosa */
-        .flower {
-            position: relative;
-            transform: scale(1.2);
-            filter: drop-shadow(0 0 15px var(--glow));
-            animation: float 4s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0) scale(1.2) rotate(-2deg); }
-            50% { transform: translateY(-20px) scale(1.25) rotate(2deg); }
-        }
-
-        /* Pétalos */
-        .petal {
-            position: absolute;
-            background: linear-gradient(45deg, var(--rose-dark), var(--rose-color));
-            border-radius: 50% 50% 10% 80%;
-            opacity: 0.9;
-            transform-origin: bottom center;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .center {
-            width: 40px;
-            height: 40px;
-            background: var(--rose-dark);
-            border-radius: 50%;
-            position: absolute;
-            top: -20px;
-            left: -20px;
-            z-index: 10;
-            box-shadow: inset 0 0 10px #000;
-        }
-
-        /* Tallo */
-        .stem {
-            width: 8px;
-            height: 300px;
-            background: linear-gradient(to bottom, #1a4d1a, #0a290a);
-            position: absolute;
-            top: 20px;
-            left: -4px;
-            border-radius: 0 0 4px 4px;
-            z-index: -1;
-        }
-
-        .leaf {
-            position: absolute;
-            width: 40px;
-            height: 20px;
-            background: linear-gradient(to right, #1a4d1a, #2d7a2d);
-            border-radius: 0 100% 0 100%;
-            top: 100px;
-            left: 5px;
-            transform-origin: left;
-            animation: breeze 3s ease-in-out infinite;
-        }
-
-        .leaf.right {
-            left: -40px;
-            transform: scaleX(-1);
-            top: 150px;
-        }
-
-        @keyframes breeze {
-            0%, 100% { transform: rotate(0deg); }
-            50% { transform: rotate(10deg); }
-        }
-
-        /* Texto */
-        .dedication {
-            position: absolute;
-            bottom: 50px;
             color: white;
             text-align: center;
-            width: 100%;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            font-size: 1.2rem;
-            text-shadow: 0 0 10px var(--glow);
+            z-index: 100;
+            transition: opacity 1s ease;
+        }
+
+        .scene {
+            width: 400px;
+            height: 400px;
+            perspective: 1200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0; /* Invisible hasta que termine la carga */
+            transition: opacity 2s ease;
+        }
+
+        #pivot {
+            position: relative;
+            width: 0;
+            height: 0;
+            transform-style: preserve-3d;
+            transform: rotateX(-20deg) rotateY(45deg);
+        }
+
+        .pixel {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            transform-style: preserve-3d;
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .face {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border: 0.1px solid rgba(0,0,0,0.2);
+        }
+
+        .f { transform: translateZ(5px); }
+        .bk { transform: rotateY(180deg) translateZ(5px); }
+        .l { transform: rotateY(-90deg) translateZ(5px); }
+        .r { transform: rotateY(90deg) translateZ(5px); }
+        .t { transform: rotateX(90deg) translateZ(5px); }
+        .bm { transform: rotateX(-90deg) translateZ(5px); }
+
+        .ui-text {
+            position: absolute;
+            top: 20px;
+            color: white;
+            text-align: center;
+            pointer-events: none;
             opacity: 0;
-            animation: fadeIn 3s forwards 2s;
+            transition: opacity 1s ease;
         }
-
-        @keyframes fadeIn {
-            to { opacity: 1; }
-        }
-
     </style>
 </head>
 <body>
 
-    <div class="stars" id="starField"></div>
-
-    <div class="flower" id="rose">
-        <div class="stem">
-            <div class="leaf"></div>
-            <div class="leaf right"></div>
+    <div id="loader">
+        <h2 id="status">Generando terreno...</h2>
+        <div style="width: 200px; height: 10px; border: 1px solid white; margin: 0 auto;">
+            <div id="bar" style="width: 0%; height: 100%; background: var(--rose-red); transition: width 5s linear;"></div>
         </div>
-        <div class="center"></div>
     </div>
 
-    <div class="dedication">
-        Eres la flor más bella de mi jardín
+    <div class="ui-text" id="instructions">
+        <h1 style="color: var(--rose-red);">UNA ROSA PARA TI</h1>
+        <p>Arrastra para explorar cada pétalo</p>
     </div>
 
-    <script>
-        const rose = document.getElementById('rose');
-        const starField = document.getElementById('starField');
+    <div class="scene" id="mainScene">
+        <div id="pivot"></div>
+    </div>
 
-        // Crear pétalos de forma procedural
-        for (let i = 0; i < 30; i++) {
-            const petal = document.createElement('div');
-            petal.className = 'petal';
-            
-            const size = 100 - (i * 2);
-            const rotation = i * 45;
-            const delay = i * 0.1;
-            
-            petal.style.width = `${size}px`;
-            petal.style.height = `${size}px`;
-            petal.style.top = `-${size/2}px`;
-            petal.style.left = `-${size/2}px`;
-            petal.style.transform = `rotate(${rotation}deg) scale(0)`;
-            petal.style.animation = `bloom 1.5s ease-out ${delay}s forwards`;
-            
-            rose.appendChild(petal);
-        }
+<script>
+    const pivot = document.getElementById('pivot');
+    const loader = document.getElementById('loader');
+    const scene = document.getElementById('mainScene');
+    const bar = document.getElementById('bar');
+    const instructions = document.getElementById('instructions');
 
-        // Crear estrellas
-        for (let i = 0; i < 100; i++) {
-            const star = document.createElement('div');
-            star.style.position = 'absolute';
-            star.style.width = '2px';
-            star.style.height = '2px';
-            star.style.background = 'white';
-            star.style.borderRadius = '50%';
-            star.style.top = Math.random() * 100 + 'vh';
-            star.style.left = Math.random() * 100 + 'vw';
-            star.style.opacity = Math.random();
-            starField.appendChild(star);
-        }
+    let rotY = 45;
+    let rotX = -20;
 
-        // Estilo de la animación de florecer
-        const styleSheet = document.createElement("style");
-        styleSheet.innerText = `
-            @keyframes bloom {
-                to { transform: rotate(var(--rot)) scale(1) translateY(-10px); }
-            }
-        `;
-        document.head.appendChild(styleSheet);
-
-        // Aplicar la rotación individual a cada pétalo
-        document.querySelectorAll('.petal').forEach((p, index) => {
-            p.style.setProperty('--rot', `${index * 25}deg`);
+    // --- GENERADOR DE BLOQUES ---
+    function createPixel(x, y, z, color, delay) {
+        const pixel = document.createElement('div');
+        pixel.className = 'pixel';
+        // Empiezan desde el centro y escalados a 0
+        pixel.style.transform = `translate3d(0, 0, 0) scale(0)`;
+        
+        const faces = ['f', 'bk', 'l', 'r', 't', 'bm'];
+        faces.forEach(face => {
+            const div = document.createElement('div');
+            div.className = `face ${face}`;
+            div.style.backgroundColor = color;
+            pixel.appendChild(div);
         });
-    </script>
-</body>
-</html>
+
+        pivot.appendChild(pixel);
+
+        // Animación de aparición con retraso
+        setTimeout(() => {
+            pixel.style.transform = `translate3d(${x}px, ${y}px, ${z}px) scale(1)`;
+        }, delay);
+    }
+
+    // --- SECUENCIA DE CONSTRUCCIÓN ---
+    async function startSequence() {
+        // 1. Iniciar barra de carga
+        setTimeout(() => bar.style.width = "100%", 100);
+
+        // 2. Esperar 5 segundos
+        await new Promise(r => setTimeout(r, 5000));
+        
+        loader.style.opacity = "0";
+        setTimeout(() => loader.remove(), 1000);
+
+        // 3. Mostrar escena
+        scene.style.opacity = "1";
+        instructions.style.opacity = "1";
+
+        let currentDelay = 0;
+
+        // Construir Tallo (15 bloques)
+        for (let y = 150; y >= 0; y -= 10) {
+            createPixel(0, y, 0, 'var(--stem-green)', currentDelay);
+            currentDelay += 50; 
+        }
+
+        // Construir Hojas (10 bloques)
+        for (let i = 0; i < 50; i += 10) {
+            createPixel(i + 10, 80 - i/2, 0, 'var(--leaf-green)', currentDelay);
+            createPixel(-i - 10, 110 - i/2, 0, 'var(--leaf-green)', currentDelay);
+            currentDelay += 30;
+        }
+
+        // Construir Capullo (+1000
