@@ -3,494 +3,179 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Minecraft Masterpiece Rose 3D - For Her</title>
+    <title>Legendary Rose - Optimized</title>
     <style>
-        /* --- Configuración y Paleta de Minecraft Maestra --- */
         :root {
-            --bg-color: #1a1a1a; /* Fondo oscuro y elegante */
-            --mc-text-shadow: 2px 2px 0px #000;
-            --bar-color: #ff3333; /* Rojo intenso de carga */
-            
-            /* Tamaños */
-            --block-size: 12px; /* Bloques más pequeños para mayor definición */
-            
-            /* Paleta de Bloques - Degradados para profundidad por cara */
-            /* Rojo Intenso - Capullo Principal */
-            --red-f: radial-gradient(#ff1a1a, #cc0000); /* Frontal */
-            --red-t: #ff4d4d; /* Superior */
-            --red-s: #990000; /* Lateral */
-            
-            /* Rojo Oscuro - Sombras e Interior */
-            --dred-f: radial-gradient(#cc0000, #800000);
-            --dred-t: #ff1a1a;
-            --dred-s: #660000;
-
-            /* Verde Vibrante - Tallo/Hojas */
-            --green-f: radial-gradient(#2eb82e, #1f7a1f);
-            --green-t: #5cd65c;
-            --green-s: #145214;
-
-            /* Verde Oscuro - Sombras/Conexiones */
-            --dgreen-f: radial-gradient(#1f7a1f, #145214);
-            --dgreen-t: #2eb82e;
-            --dgreen-s: #0a290a;
-            
-            /* Marrón - Espinas */
-            --brown-f: radial-gradient(#8b4513, #5d2e0a);
-            --brown-t: #a0522d;
-            --brown-s: #402005;
+            --bg-color: #0d0d0d;
+            --block-size: 11px; /* Un poco más pequeña para ganar rendimiento */
+            --red-f: #ff1a1a; --red-t: #ff4d4d; --red-s: #990000;
+            --green-f: #2eb82e; --green-t: #5cd65c; --green-s: #145214;
         }
 
-        /* --- Resets y Globales --- */
         * { box-sizing: border-box; margin: 0; padding: 0; touch-action: none; }
 
         body {
             height: 100vh;
             background-color: var(--bg-color);
             color: white;
-            font-family: 'Courier New', monospace; /* Tipografía tipo Minecraft */
+            font-family: 'Courier New', monospace;
             display: flex;
             justify-content: center;
             align-items: center;
             overflow: hidden;
-            user-select: none;
         }
 
-        /* --- Pantalla de Carga (Estilo Crafteo) --- */
+        /* Pantalla de carga */
         #loader {
             position: absolute;
             text-align: center;
             z-index: 100;
-            transition: opacity 0.5s ease;
             width: 100%;
         }
 
-        #status {
-            font-weight: 300;
-            margin-bottom: 20px;
-            font-size: 1.2rem;
-            text-transform: uppercase;
-            text-shadow: var(--mc-text-shadow);
-        }
-
         .loading-bar-container {
-            width: 280px;
-            height: 14px;
+            width: 200px; height: 10px;
             border: 2px solid white;
-            margin: 0 auto;
-            position: relative;
-            background: rgba(0,0,0,0.6);
+            margin: 15px auto;
+            background: rgba(0,0,0,0.5);
         }
 
-        #bar {
-            width: 0%;
-            height: 100%;
-            background-color: var(--bar-color);
-            transition: width 0.1s linear;
-            box-shadow: 0 0 10px rgba(255,0,0,0.5);
-        }
+        #bar { width: 0%; height: 100%; background: #ff3333; }
 
-        /* --- Contenedor Principal (Escena) --- */
+        /* Escena 3D */
         .scene {
-            width: 100vw;
-            height: 100vh;
-            perspective: 1500px; /* Mayor profundidad para el modelo denso */
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            perspective: 1000px;
             opacity: 0;
-            transition: opacity 1s ease;
+            transition: opacity 1s;
+            will-change: opacity;
         }
 
         #pivot {
             position: relative;
             transform-style: preserve-3d;
-            /* Inclinación base optimizada */
             transform: rotateX(-15deg) rotateY(45deg);
+            will-change: transform;
         }
 
-        /* --- Definición del Bloque (Cubo) --- */
+        /* El Cubo Voxel */
         .block {
             position: absolute;
             width: var(--block-size);
             height: var(--block-size);
             transform-style: preserve-3d;
-            /* Suavizado de aparición individual con efecto elástico */
-            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            will-change: transform;
         }
 
-        /* Caras del Cubo */
         .face {
             position: absolute;
-            width: var(--block-size);
-            height: var(--block-size);
-            border: 0.1px solid rgba(0,0,0,0.05); /* Borde casi invisible para definición */
-            image-rendering: pixelated; /* ¡Look pixelado! */
+            width: 100%; height: 100%;
+            backface-visibility: hidden; /* CRÍTICO: No renderiza lo que no se ve */
         }
 
-        /* Orientación de las caras */
-        .front  { transform: translateZ(calc(var(--block-size) / 2)); }
-        .back   { transform: rotateY(180deg) translateZ(calc(var(--block-size) / 2)); }
-        .left   { transform: rotateY(-90deg) translateZ(calc(var(--block-size) / 2)); }
-        .right  { transform: rotateY(90deg) translateZ(calc(var(--block-size) / 2)); }
-        .top    { transform: rotateX(90deg) translateZ(calc(var(--block-size) / 2)); }
-        .bottom { transform: rotateX(-90deg) translateZ(calc(var(--block-size) / 2)); }
+        .f { transform: translateZ(5.5px); }
+        .bk { transform: rotateY(180deg) translateZ(5.5px); }
+        .l { transform: rotateY(-90deg) translateZ(5.5px); }
+        .r { transform: rotateY(90deg) translateZ(5.5px); }
+        .t { transform: rotateX(90deg) translateZ(5.5px); }
+        .bm { transform: rotateX(-90deg) translateZ(5.5px); }
 
-        /* Estilos de Bloque - Aplicando degradados complejos */
-        /* Bloque Rojo */
-        .block-red .front, .block-red .back { background: var(--red-f); }
-        .block-red .left,  .block-red .right { background: var(--red-s); }
-        .block-red .top                      { background: var(--red-t); }
-        .block-red .bottom                   { background: var(--red-s); opacity: 0.7; }
+        /* Colores */
+        .r-b .face { background: var(--red-f); } .r-b .t { background: var(--red-t); } .r-b .l, .r-b .r { background: var(--red-s); }
+        .g-b .face { background: var(--green-f); } .g-b .t { background: var(--green-t); } .g-b .l, .g-b .r { background: var(--green-s); }
 
-        /* Bloque Rojo Oscuro */
-        .block-dred .front, .block-dred .back { background: var(--dred-f); }
-        .block-dred .left,  .block-dred .right { background: var(--dred-s); }
-        .block-dred .top                        { background: var(--dred-t); }
-        .block-dred .bottom                     { background: var(--dred-s); opacity: 0.7; }
-
-        /* Bloque Verde */
-        .block-green .front, .block-green .back { background: var(--green-f); }
-        .block-green .left,  .block-green .right { background: var(--green-s); }
-        .block-green .top                        { background: var(--green-t); }
-        .block-green .bottom                     { background: var(--green-s); opacity: 0.7; }
-
-        /* Bloque Verde Oscuro */
-        .block-dgreen .front, .block-dgreen .back { background: var(--dgreen-f); }
-        .block-dgreen .left,  .block-dgreen .right { background: var(--dgreen-s); }
-        .block-dgreen .top                          { background: var(--dgreen-t); }
-        .block-dgreen .bottom                       { background: var(--dgreen-s); opacity: 0.7; }
-        
-        /* Bloque Marrón (Espina) */
-        .block-brown .front, .block-brown .back { background: var(--brown-f); }
-        .block-brown .left,  .block-brown .right { background: var(--brown-s); }
-        .block-brown .top                        { background: var(--brown-t); }
-        .block-brown .bottom                     { background: var(--brown-s); }
-
-
-        /* --- Sombra Proyectada en el Suelo --- */
-        .shadow-floor {
-            position: absolute;
-            width: 250px; height: 250px;
-            background: radial-gradient(circle, rgba(0,0,0,0.6) 0%, transparent 70%);
-            transform: rotateX(90deg) translateZ(-20px);
-            margin-left: -125px;
-            margin-top: -125px;
-            pointer-events: none;
-        }
-
-        /* --- Texto Inferior (Mítico) --- */
         #instructions {
             position: absolute;
-            bottom: 30px;
+            bottom: 20px;
             text-align: center;
-            width: 90%;
-            max-width: 500px;
-            pointer-events: none;
+            background: rgba(0,0,0,0.8);
+            padding: 15px;
+            border: 1px solid gold;
             opacity: 0;
-            transition: opacity 1s ease;
-            background: rgba(0,0,0,0.7);
-            padding: 20px;
-            border: 3px solid white;
-            box-shadow: 0 0 15px rgba(255,255,255,0.2);
+            transition: 1s;
         }
-
-        #instructions h1 {
-            color: #ffaa00; /* Dorado Mítico */
-            font-size: 1.5rem;
-            margin-bottom: 8px;
-            font-weight: bold;
-            text-transform: uppercase;
-            text-shadow: var(--mc-text-shadow);
-            letter-spacing: 1px;
-        }
-
-        #instructions p {
-            font-size: 1rem;
-            color: #eee;
-            line-height: 1.4;
-        }
-
     </style>
 </head>
 <body>
 
     <div id="loader">
-        <h2 id="status">Crafteando obra maestra...</h2>
-        <div class="loading-bar-container">
-            <div id="bar"></div>
-        </div>
+        <h2 id="status">Cargando...</h2>
+        <div class="loading-bar-container"><div id="bar"></div></div>
     </div>
 
     <div class="scene" id="mainScene">
-        <div id="pivot">
-            <div class="shadow-floor"></div>
-        </div>
+        <div id="pivot"></div>
     </div>
 
     <div id="instructions">
-        <h1>[LEGENDARY ITEM]</h1>
-        <p>Una rosa única, crafteada con amor para alguien tan especial como tú.</p>
-        <p style="font-size: 0.8rem; color: #aaa; margin-top: 8px;">(Arrastra para explorar cada pétalo)</p>
+        <h1 style="color: gold; font-size: 1.2rem;">[RARE ITEM]</h1>
+        <p>Para la persona más especial.</p>
     </div>
 
     <script>
-        // --- Elementos del DOM ---
-        const dom = {
-            loader: document.getElementById('loader'),
-            bar: document.getElementById('bar'),
-            status: document.getElementById('status'),
-            scene: document.getElementById('mainScene'),
-            pivot: document.getElementById('pivot'),
-            instructions: document.getElementById('instructions')
+        const pivot = document.getElementById('pivot');
+        const bar = document.getElementById('bar');
+
+        // Estructura simplificada pero visualmente densa
+        const roseBlocks = [];
+        // Tallo
+        for(let i=0; i<10; i++) roseBlocks.push({x: Math.sin(i*0.3), y: i, z: 0, c: 'g-b'});
+        // Hojas
+        roseBlocks.push({x: 1, y: 3, z: 0, c: 'g-b'}, {x: 2, y: 4, z: 0, c: 'g-b'}, {x: -1, y: 5, z: 0, c: 'g-b'});
+        // Capullo (Estructura de diamante)
+        for(let y=10; y<15; y++) {
+            let r = y < 13 ? y-9 : 15-y;
+            for(let x=-r; x<=r; x++) {
+                for(let z=-r; z<=r; z++) {
+                    if(Math.abs(x)+Math.abs(z) <= r) roseBlocks.push({x, y, z, c: 'r-b'});
+                }
+            }
+        }
+
+        let currentIdx = 0;
+        function chunkedBuild() {
+            const chunkSize = 15; // Crea 15 bloques por vez
+            for(let i=0; i<chunkSize && currentIdx < roseBlocks.length; i++) {
+                const b = roseBlocks[currentIdx];
+                const el = document.createElement('div');
+                el.className = `block ${b.c}`;
+                el.style.transform = `translate3d(${b.x * 12}px, ${-b.y * 12}px, ${b.z * 12}px)`;
+                el.innerHTML = '<div class="face f"></div><div class="face bk"></div><div class="face l"></div><div class="face r"></div><div class="face t"></div><div class="face bm"></div>';
+                pivot.appendChild(el);
+                currentIdx++;
+            }
+
+            bar.style.width = (currentIdx / roseBlocks.length * 100) + '%';
+
+            if(currentIdx < roseBlocks.length) {
+                requestAnimationFrame(chunkedBuild); // Siguiente lote en el siguiente frame
+            } else {
+                startScene();
+            }
+        }
+
+        function startScene() {
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('mainScene').style.opacity = '1';
+            document.getElementById('instructions').style.opacity = '1';
+            animate();
+        }
+
+        let rotY = 45, rotX = -15, tRotY = 45, tRotX = -15;
+        window.onpointermove = e => {
+            tRotY += e.movementX * 0.5;
+            tRotX -= e.movementY * 0.5;
         };
 
-        // --- Generador de la Estructura de la Rosa (Voxel Data) ---
-        // Retraso base para la animación de aparición
-        const baseDelay = 800;
-        
-        // Función auxiliar para generar la estructura densa y orgánica
-        function generateRoseStructure() {
-            const data = [];
-            let delayCount = 0;
-
-            // --- 1. TALLO CURVADO Y ORGÁNICO (y=0 a y=10) ---
-            // x/z centrado en 0. y crece hacia arriba.
-            for (let y = 0; y <= 10; y++) {
-                // Ecuación de curvatura suave (onda senoidal leve)
-                let x = Math.sin(y * 0.3) * 1.5;
-                let z = Math.cos(y * 0.2) * 1.0;
-                
-                // Grosor del tallo (2 bloques en la base, 1 arriba)
-                data.push([Math.round(x), y, Math.round(z), 'block-dgreen', delayCount * 40]);
-                if (y < 4) {
-                    data.push([Math.round(x) + 1, y, Math.round(z), 'block-green', delayCount * 40 + 20]);
-                }
-                
-                // --- AÑADIR ESPINAS ---
-                if (y === 3) data.push([Math.round(x) - 1, y, Math.round(z), 'block-brown', delayCount * 40 + 100]);
-                if (y === 6) data.push([Math.round(x), y, Math.round(z) + 1, 'block-brown', delayCount * 40 + 150]);
-                if (y === 8) data.push([Math.round(x) + 1, y, Math.round(z) - 1, 'block-brown', delayCount * 40 + 200]);
-
-                delayCount++;
-            }
-
-            // --- 2. HOJAS DETALLADAS Y ASIMÉTRICAS (y=4, y=7) ---
-            // Hoja Inferior (y=4) - Curvada hacia afuera
-            for (let i = 1; i <= 4; i++) {
-                for (let j = -1; j <= 1; j++) {
-                    let yOffset = i === 1 ? 0 : (i === 4 ? -1 : (i === 3 ? -1 : 0)); // Curvatura
-                    if (Math.abs(j) < (4-i)/2 + 1) { // Forma triangular
-                        data.push([i + 1, 4 + yOffset, j, (i+j)%2 === 0 ? 'block-green' : 'block-dgreen', delayCount * 40 + i * 50]);
-                    }
-                }
-            }
-            
-            // Hoja Superior (y=7) - Apuntando en otra dirección
-            for (let i = 1; i <= 3; i++) {
-                for (let j = -1; j <= 1; j++) {
-                    let yOffset = i === 3 ? -1 : 0;
-                    if (Math.abs(j) < (3-i)/2 + 1) {
-                        data.push([-i - 1, 7 + yOffset, -j, 'block-green', delayCount * 40 + i * 50]);
-                    }
-                }
-            }
-            
-            delayCount += 5; // Pausa para las hojas
-
-            // --- 3. EL CAPULLO MAESTRO (y=11 a y=16) ---
-            // Densa construcción voxel basada en las referencias. Centrado en el tallo final.
-            const capulloBaseY = 11;
-
-            // Capas del capullo (Nivel por Nivel)
-            // Nivel 0 (y=11): Base y Conexión (Verde Oscuro a Rojo Oscuro)
-            for (let x = -1; x <= 1; x++) {
-                for (let z = -1; z <= 1; z++) {
-                    let type = (x===0 && z===0) ? 'block-dred' : 'block-dgreen';
-                    data.push([x, capulloBaseY, z, type, delayCount * 40]);
-                    delayCount++;
-                }
-            }
-
-            // Nivel 1 (y=12): Cuerpo Inferior (Cúbico y denso)
-            for (let x = -2; x <= 2; x++) {
-                for (let z = -2; z <= 2; z++) {
-                    if (Math.abs(x) < 2 || Math.abs(z) < 2) { // Evitar las esquinas perfectas
-                        let type = (x===0 && z===0) ? 'block-dred' : 'block-red';
-                        data.push([x, capulloBaseY + 1, z, type, delayCount * 40]);
-                        delayCount++;
-                    }
-                }
-            }
-
-            // Nivel 2 (y=13): Cuerpo Central (Máximo Volumen)
-            // Capa Interior
-            for (let x = -1; x <= 1; x++) {
-                for (let z = -1; z <= 1; z++) {
-                    data.push([x, capulloBaseY + 2, z, 'block-dred', delayCount * 40]);
-                    delayCount++;
-                }
-            }
-            // Pétalos Exteriores (Abriéndose de forma asimétrica)
-            const petalCoordsY13 = [
-                [3, 0], [2, 1], [2, -1],   // Derecha
-                [-3, 0], [-2, 1], [-2, -1], // Izquierda
-                [0, 3], [1, 2], [-1, 2],   // Frontal
-                [0, -3], [1, -2], [-1, -2], // Trasero
-                [2, 2], [-2, -2], [2, -2], [-2, 2] // Esquinas
-            ];
-            petalCoordsY13.forEach(p => {
-                data.push([p[0], capulloBaseY + 2, p[1], 'block-red', delayCount * 40]);
-                delayCount++;
-            });
-
-            // Nivel 3 (y=14): Capa Superior y Pétalos en Apertura
-            // Capa Interior (Núcleo)
-            for (let x = -1; x <= 1; x++) {
-                for (let z = -1; z <= 1; z++) {
-                    data.push([x, capulloBaseY + 3, z, 'block-dred', delayCount * 40]);
-                    delayCount++;
-                }
-            }
-            // Pétalos Exteriores (Más desordenados y curvados)
-            const petalCoordsY14 = [
-                [2, 0], [-2, 0], [0, 2], [0, -2],
-                [2, 2], [2, -2], [-2, 2], [-2, -2],
-                [3, 1, 1], // Pétalo alto y asimétrico [x,y,z]
-                [-3, -1, -1] // Pétalo bajo y asimétrico
-            ];
-            petalCoordsY14.forEach(p => {
-                // Si la coordenada tiene 3 elementos, p[2] es un offset de Y
-                let yOffset = p.length > 2 ? p[2] : 0;
-                data.push([p[0], capulloBaseY + 3 + yOffset, p[1], 'block-red', delayCount * 40]);
-                delayCount++;
-            });
-
-            // Nivel 4/5 (y=15/16): El Núcleo Pétalo por Pétalo
-            data.push([0, capulloBaseY + 4, 0, 'block-red', delayCount * 40]); delayCount++;
-            data.push([1, capulloBaseY + 4, 1, 'block-red', delayCount * 40]); delayCount++;
-            data.push([-1, capulloBaseY + 4, -1, 'block-dred', delayCount * 40]); delayCount++;
-            
-            // Pétalos más altos y centrales (Núcleo cerrado)
-            data.push([0, capulloBaseY + 5, 0, 'block-red', delayCount * 40]); delayCount++;
-            data.push([1, capulloBaseY + 5, 0, 'block-dred', delayCount * 40]); delayCount++;
-            data.push([0, capulloBaseY + 6, 0, 'block-red', delayCount * 40]); delayCount++; // El pico central
-
-            return data;
+        function animate() {
+            rotY += (tRotY - rotY) * 0.1;
+            rotX += (tRotX - rotX) * 0.1;
+            pivot.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+            requestAnimationFrame(animate);
         }
 
-        const roseStructure = generateRoseStructure();
+        // Iniciar construcción después de un segundo
+        setTimeout(chunkedBuild, 1000);
+    </script>
+</body>
+</html>
 
-        // --- Generador Automático de Bloques Voxel ---
-        function createBlock(x, y, z, blockClass, delay) {
-            const block = document.createElement('div');
-            block.className = `block ${blockClass}`;
-            
-            // Posicionamiento 3D inicial (escalado a 0 para aparición elástica)
-            // Usamos unidades de bloque para x/y/z y lo convertimos a px
-            block.style.transform = `translate3d(calc(${x} * var(--block-size)), calc(${-y} * var(--block-size)), calc(${z} * var(--block-size))) scale(0)`;
-            
-            // Crear las 6 caras
-            const faces = ['front', 'back', 'left', 'right', 'top', 'bottom'];
-            faces.forEach(faceName => {
-                const face = document.createElement('div');
-                face.className = `face ${faceName}`;
-                block.appendChild(face);
-            });
-
-            // Añadir al pivot
-            dom.pivot.appendChild(block);
-
-            // Animación de aparición con retraso individual
-            setTimeout(() => {
-                block.style.transform = `translate3d(calc(${x} * var(--block-size)), calc(${-y} * var(--block-size)), calc(${z} * var(--block-size))) scale(1)`;
-            }, baseDelay + delay);
-        }
-
-        // --- Configuración de Rotación Suavizada (Física) ---
-        let targetRotY = 45;
-        let targetRotX = -15;
-        let currentRotY = 45;
-        let currentRotX = -15;
-        const sensitivity = 0.5; // Sensibilidad al arrastrar
-        const smoothness = 0.12; // Factor de suavizado (0.01 a 1)
-
-        // --- Simulación de Carga (5 segundos para la obra maestra) ---
-        function simulateLoading() {
-            let progress = 0;
-            const startTime = Date.now();
-            const duration = 5000; // 5 segundos
-
-            const phrases = [
-                "Generando chunks...",
-                "Buscando el bioma místico...",
-                "Crafteando pétalos voxel por voxel...",
-                "Inyectando amor en el código...",
-                "Casi listo..."
-            ];
-
-            const interval = setInterval(() => {
-                const elapsed = Date.now() - startTime;
-                progress = (elapsed / duration) * 100;
-
-                if (progress >= 100) {
-                    dom.bar.style.width = '100%';
-                    dom.status.innerText = "¡Crafteado!";
-                    dom.status.style.color = "#ffaa00"; // Dorado
-                    clearInterval(interval);
-                    setTimeout(showScene, 600);
-                } else {
-                    dom.bar.style.width = progress + '%';
-                    // Cambiar frase aleatoriamente
-                    if (Math.random() > 0.96) {
-                        dom.status.innerText = phrases[Math.floor(Math.random() * phrases.length)];
-                    }
-                }
-            }, 50);
-        }
-
-        // --- Mostrar la Escena y Generar la Rosa ---
-        function showScene() {
-            // Ocultar carga, mostrar escena
-            dom.loader.style.opacity = '0';
-            setTimeout(() => {
-                dom.loader.remove();
-                dom.scene.style.opacity = '1';
-                dom.instructions.style.opacity = '1';
-
-                // --- GENERAR LA ROSA MAESTRA DE BLOQUES ---
-                // Iterar sobre la estructura generada dinámicamente
-                roseStructure.forEach(data => {
-                    createBlock(data[0], data[1], data[2], data[3], data[4]);
-                });
-
-                // Iniciar el bucle de renderizado optimizado
-                requestAnimationFrame(updateRotation);
-            }, 500);
-        }
-
-        // --- Lógica de Interacción Unificada (Mouse y Táctil) ---
-        let isDragging = false;
-        let lastX = 0;
-        let lastY = 0;
-
-        function getEventPos(e) {
-            if (e.touches && e.touches.length > 0) {
-                return { x: e.touches[0].pageX, y: e.touches[0].pageY };
-            }
-            return { x: e.pageX, y: e.pageY };
-        }
-
-        function onStart(e) {
-            isDragging = true;
-            const pos = getEventPos(e);
-            lastX = pos.x;
-            lastY = pos.y;
-            if(e.type === 'touchstart') e.preventDefault(); // Evitar scroll en móvil
-        }
-
-        function onMove(e) {
-            if (!isDragging) return;
-            const pos = getEventPos(e);
-            const deltaX = pos.x - lastX;
-            const deltaY = pos.y - 
