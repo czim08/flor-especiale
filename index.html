@@ -3,30 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Rare Item 3D - Optimizado</title>
+    <title>Minecraft Block Rose 3D - Accurate</title>
     <style>
+        /* --- Configuración y Paleta de Minecraft --- */
         :root {
-            --bg-color: #121212; /* Fondo oscuro tipo Nether */
-            --bar-color: #ff4d4d; /* Rojo intenso para la carga */
-            --text-color: #ffffff;
-            --rare-color: #ffaa00; /* Dorado para el texto "Rare Item" */
+            --bg-color: #2c2c2c; /* Fondo oscuro tipo Nether/Cueva */
+            --mc-text-shadow: 2px 2px 0px #000;
+            --bar-color: #ff4d4d; /* Rojo de carga */
+            
+            /* Tamaños */
+            --block-size: 15px; /* Tamaño de un bloque unitario */
+            
+            /* Paleta de Bloques - Degradados para profundidad por cara */
+            /* Rojo - Capullo */
+            --red-f: radial-gradient(#ff3333, #e60000); /* Frontal */
+            --red-t: #ff6666; /* Superior */
+            --red-s: #b30000; /* Lateral */
+            
+            /* Verde - Tallo/Hojas */
+            --green-f: radial-gradient(#33cc33, #1a991a);
+            --green-t: #66ff66;
+            --green-s: #0d660d;
+
+            /* Verde Oscuro - Base/Conexiones */
+            --dgreen-f: radial-gradient(#1a991a, #0d660d);
+            --dgreen-t: #33cc33;
+            --dgreen-s: #064d06;
         }
 
-        * { box-sizing: border-box; touch-action: none; margin: 0; padding: 0; }
+        /* --- Resets y Globales --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            touch-action: none; /* Desactivar gestos del navegador */
+        }
 
         body {
             height: 100vh;
             background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: 'Courier New', monospace; /* Tipografía tipo Minecraft */
+            color: white;
+            font-family: 'Courier New', monospace; /* Tipografía tipo MC */
             display: flex;
             justify-content: center;
             align-items: center;
             overflow: hidden;
-            user-select: none;
+            user-select: none; /* No seleccionar texto al arrastrar */
         }
 
-        /* --- Pantalla de Carga (Loader) --- */
+        /* --- Pantalla de Carga (Minecraft Style) --- */
         #loader {
             position: absolute;
             text-align: center;
@@ -35,10 +60,17 @@
             width: 100%;
         }
 
-        #status { font-weight: 300; margin-bottom: 15px; font-size: 1.1rem; text-transform: uppercase; }
+        #loader h2 {
+            font-weight: 300;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            text-shadow: var(--mc-text-shadow);
+        }
 
         .loading-bar-container {
-            width: 220px; height: 10px;
+            width: 250px;
+            height: 12px;
             border: 2px solid white;
             margin: 0 auto;
             position: relative;
@@ -46,82 +78,85 @@
         }
 
         #bar {
-            width: 0%; height: 100%;
+            width: 0%;
+            height: 100%;
             background-color: var(--bar-color);
             transition: width 0.1s linear;
-            box-shadow: 0 0 10px var(--bar-color);
         }
 
-        /* --- Contenedor Principal (Scene) --- */
+        /* --- Contenedor Principal (Escena) --- */
         .scene {
-            width: 100vw; height: 100vh;
-            perspective: 1000px;
+            width: 100vw;
+            height: 100vh;
+            perspective: 1200px; /* Profundidad 3D */
             display: flex;
             justify-content: center;
             align-items: center;
-            opacity: 0;
+            opacity: 0; /* Invisible hasta carga completa */
             transition: opacity 1s ease;
         }
 
         #pivot {
             position: relative;
             transform-style: preserve-3d;
-            /* Inclinación base optimizada */
+            /* Inclinación base para apreciar el volumen */
             transform: rotateX(-15deg) rotateY(45deg);
-            will-change: transform; /* Ayuda al rendimiento */
         }
 
-        /* --- El Modelo (Planos Cruzados) --- */
-        .flower-model {
+        /* --- Definición del Bloque (Cubo) --- */
+        .block {
             position: absolute;
+            width: var(--block-size);
+            height: var(--block-size);
             transform-style: preserve-3d;
-            /* Centrar el modelo */
-            margin-left: -75px; /* -(width/2) */
-            margin-top: -150px; /* -height */
-            width: 150px;
-            height: 150px;
+            /* Suavizado de aparición individual */
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        .sprite-plane {
+        /* Caras del Cubo */
+        .face {
             position: absolute;
-            width: 100%;
-            height: 100%;
-            background-size: 100% 100%;
-            image-rendering: pixelated; /* ¡Look Minecraft! */
-            
-            /* --- GENERADOR DE TEXTURA DE ROSA (CSS Puro) --- */
-            /* Capa 1: El capullo rojo con degradado radial */
-            background-image: 
-                radial-gradient(circle at 50% 30%, #ff1a1a 0%, #b30000 40%, transparent 50%),
-                /* Capa 2: El tallo verde con degradado lineal */
-                linear-gradient(to top, transparent 0%, #00cc44 10%, #006622 50%, transparent 60%);
-            
-            /* Sombra suave para dar volumen */
-            filter: drop-shadow(0 0 5px rgba(255,0,0,0.3));
+            width: var(--block-size);
+            height: var(--block-size);
+            border: 0.1px solid rgba(0,0,0,0.1); /* Micro-borde para definir bloque */
+            image-rendering: pixelated; /* ¡Look pixelado! */
         }
 
-        /* Plano 1: Normal */
-        .p1 { transform: rotateY(0deg); }
-        /* Plano 2: Girado 90 grados para crear la cruz (+) */
-        .p2 { transform: rotateY(90deg); }
+        /* Orientación de las caras */
+        .front  { transform: translateZ(calc(var(--block-size) / 2)); }
+        .back   { transform: rotateY(180deg) translateZ(calc(var(--block-size) / 2)); }
+        .left   { transform: rotateY(-90deg) translateZ(calc(var(--block-size) / 2)); }
+        .right  { transform: rotateY(90deg) translateZ(calc(var(--block-size) / 2)); }
+        .top    { transform: rotateX(90deg) translateZ(calc(var(--block-size) / 2)); }
+        .bottom { transform: rotateX(-90deg) translateZ(calc(var(--block-size) / 2)); }
 
-        /* --- Sombra en el suelo para realismo --- */
-        .shadow {
-            position: absolute;
-            width: 100px; height: 100px;
-            background: radial-gradient(circle, rgba(0,0,0,0.7) 0%, transparent 70%);
-            transform: rotateX(90deg) translateZ(-10px);
-            margin-left: -50px;
-            margin-top: -50px;
-        }
+        /* Estilos de Bloque - Aplicando degradados a las caras */
+        /* Bloque Rojo */
+        .block-red .front, .block-red .back { background: var(--red-f); }
+        .block-red .left,  .block-red .right { background: var(--red-s); }
+        .block-red .top                      { background: var(--red-t); }
+        .block-red .bottom                   { background: var(--red-s); opacity: 0.8; }
 
-        /* --- Texto de Instrucciones --- */
+        /* Bloque Verde */
+        .block-green .front, .block-green .back { background: var(--green-f); }
+        .block-green .left,  .block-green .right { background: var(--green-s); }
+        .block-green .top                        { background: var(--green-t); }
+        .block-green .bottom                     { background: var(--green-s); opacity: 0.8; }
+
+        /* Bloque Verde Oscuro */
+        .block-dgreen .front, .block-dgreen .back { background: var(--dgreen-f); }
+        .block-dgreen .left,  .block-dgreen .right { background: var(--dgreen-s); }
+        .block-dgreen .top                          { background: var(--dgreen-t); }
+        .block-dgreen .bottom                       { background: var(--dgreen-s); opacity: 0.8; }
+
+
+        /* --- Texto Inferior --- */
         #instructions {
             position: absolute;
             bottom: 30px;
             text-align: center;
             width: 90%;
-            max-width: 400px;
+            max-width: 450px;
             pointer-events: none;
             opacity: 0;
             transition: opacity 1s ease;
@@ -131,24 +166,16 @@
         }
 
         #instructions h1 {
-            color: var(--rare-color); /* Dorado */
-            font-size: 1.3rem;
-            margin-bottom: 8px;
+            color: #ffaa00; /* Color "Rare" o "Gold" */
+            font-size: 1.4rem;
+            margin-bottom: 5px;
             font-weight: bold;
-            text-transform: uppercase;
-            text-shadow: 2px 2px 0px rgba(0,0,0,0.5);
+            text-shadow: var(--mc-text-shadow);
         }
 
         #instructions p {
-            font-size: 0.9rem;
-            color: #ccc;
-            line-height: 1.3;
-        }
-
-        /* Ajuste para pantallas muy pequeñas */
-        @media (max-height: 500px) {
-            #instructions { bottom: 10px; padding: 10px; }
-            #instructions h1 { font-size: 1.1rem; }
+            font-size: 0.95rem;
+            color: #ddd;
         }
 
     </style>
@@ -164,18 +191,13 @@
 
     <div class="scene" id="mainScene">
         <div id="pivot">
-            <div class="flower-model">
-                <div class="sprite-plane p1"></div>
-                <div class="sprite-plane p2"></div>
             </div>
-            <div class="shadow"></div>
-        </div>
     </div>
 
     <div id="instructions">
         <h1>[RARE ITEM]</h1>
-        <p>Para una persona tan especial como tú.</p>
-        <p style="font-size: 0.8rem; color: #888; margin-top: 5px;">(Arrastra para girar)</p>
+        <p>Una rosa crafteada para alguien tan especial como tú.</p>
+        <p style="font-size: 0.8rem; color: #aaa; margin-top: 5px;">(Arrastra para explorar)</p>
     </div>
 
     <script>
@@ -189,28 +211,107 @@
             instructions: document.getElementById('instructions')
         };
 
+        // --- Configuración de Bloques y Estructura Organica (basada en image_22/23) ---
+        // Definimos la rosa como una lista de coordenadas [x, y, z, tipo_bloque, retraso_aparicion]
+        // y = 0 es el suelo. x/z centrado en 0. y crece hacia arriba.
+        const roseStructure = [
+            // Tallo - Curvado (y=0 a y=5)
+            [0, 0, 0, 'block-dgreen', 0],
+            [1, 1, 0, 'block-green', 100],
+            [1, 2, 0, 'block-green', 200],
+            [0, 3, 0, 'block-green', 300],
+            [-1, 4, 0, 'block-dgreen', 400],
+            [0, 5, 0, 'block-dgreen', 500], // Base del capullo
+
+            // Hojas laterales - Curvadas y asimétricas
+            // Hoja 1 (inferior derecha)
+            [2, 2, 0, 'block-green', 250],
+            [3, 3, 1, 'block-green', 350],
+            [2, 3, 1, 'block-dgreen', 400],
+
+            // Hoja 2 (superior izquierda)
+            [-2, 4, 0, 'block-green', 450],
+            [-3, 5, -1, 'block-green', 550],
+            [-2, 5, -1, 'block-dgreen', 600],
+
+            // Capullo - Base Conica (y=6 a y=7) - (Verde Oscuro a Rojo)
+            [0, 6, 0, 'block-red', 650],  // Centro inferior
+            [1, 6, 0, 'block-dgreen', 700],
+            [-1, 6, 0, 'block-dgreen', 700],
+            [0, 6, 1, 'block-dgreen', 700],
+            [0, 6, -1, 'block-dgreen', 700],
+
+            // Capullo - Cuerpo Principal (y=7) - Voluminoso y asimétrico
+            [0, 7, 0, 'block-red', 750],   // Nucleo
+            [1, 7, 0, 'block-red', 800],
+            [-1, 7, 0, 'block-red', 800],
+            [0, 7, 1, 'block-red', 800],
+            [0, 7, -1, 'block-red', 800],
+            [1, 7, 1, 'block-red', 850],   // Esquinas
+            [-1, 7, -1, 'block-red', 850],
+            [1, 7, -1, 'block-red', 850],
+            [-1, 7, 1, 'block-red', 850],
+            
+            // Capullo - Pétalos Exteriores Desordenados (y=7/8)
+            [2, 7, 0, 'block-red', 900],   // Extremo derecho
+            [-2, 8, 0, 'block-red', 950],  // Extremo izquierdo superior
+
+            // Capullo - Parte Superior (y=8/9) - Más pequeña y detallada
+            [0, 8, 0, 'block-red', 950],   // Nucleo superior
+            [1, 8, 0, 'block-red', 1000],
+            [-1, 8, 0, 'block-red', 1000],
+            [0, 8, 1, 'block-red', 1000],
+            [0, 8, -1, 'block-red', 1000],
+            
+            [0, 9, 0, 'block-red', 1050],  // Pétalo central más alto
+            [1, 9, 1, 'block-red', 1100],  // Pétalo asimétrico alto
+        ];
+
+        // --- Generador Automático de Bloques ---
+        function createBlock(x, y, z, blockClass, delay) {
+            const block = document.createElement('div');
+            block.className = `block ${blockClass}`;
+            
+            // Posicionamiento 3D inicial (escalado a 0 para aparición suave)
+            // Usamos unidades de bloque para x/y/z y lo convertimos a px
+            block.style.transform = `translate3d(calc(${x} * var(--block-size)), calc(${-y} * var(--block-size)), calc(${z} * var(--block-size))) scale(0)`;
+            
+            // Crear las 6 caras
+            const faces = ['front', 'back', 'left', 'right', 'top', 'bottom'];
+            faces.forEach(faceName => {
+                const face = document.createElement('div');
+                face.className = `face ${faceName}`;
+                block.appendChild(face);
+            });
+
+            // Añadir al pivot
+            dom.pivot.appendChild(block);
+
+            // Animación de aparición con retraso
+            setTimeout(() => {
+                block.style.transform = `translate3d(calc(${x} * var(--block-size)), calc(${-y} * var(--block-size)), calc(${z} * var(--block-size))) scale(1)`;
+            }, delay);
+        }
+
         // --- Configuración de Rotación Suavizada ---
         let targetRotY = 45;
         let targetRotX = -15;
         let currentRotY = 45;
         let currentRotX = -15;
-        
-        // Sensibilidad táctil/mouse (ajusta si lo sientes muy rápido/lento)
-        const sensitivity = 0.4; 
-        // Suavizado (0.01 a 1, más bajo es más suave/lento)
-        const smoothness = 0.12; 
+        const sensitivity = 0.5; // Sensibilidad al arrastrar
+        const smoothness = 0.15; // Factor de suavizado (0.01 a 1)
 
-        // --- Simulación de Carga (5 segundos) ---
+        // --- Simulación de Carga (4 segundos) ---
         function simulateLoading() {
             let progress = 0;
             const startTime = Date.now();
-            const duration = 5000; // 5 segundos
+            const duration = 4000; // 4 segundos
 
             const phrases = [
-                "Generando terreno...",
-                "Buscando bioma raro...",
+                "Generando chunks...",
+                "Buscando el bioma perfecto...",
+                "Plantando semillas voxel...",
                 "Crafteando pétalos...",
-                "Encantando objeto...",
                 "Casi listo..."
             ];
 
@@ -221,32 +322,42 @@
                 if (progress >= 100) {
                     dom.bar.style.width = '100%';
                     dom.status.innerText = "¡Crafteado!";
-                    dom.status.style.color = "var(--rare-color)";
+                    dom.status.style.color = "#ffaa00";
                     clearInterval(interval);
-                    setTimeout(showScene, 600);
+                    setTimeout(showScene, 500);
                 } else {
                     dom.bar.style.width = progress + '%';
-                    // Cambiar frase aleatoriamente para dar feedback
-                    if (Math.random() > 0.94) {
+                    // Cambiar frase aleatoriamente
+                    if (Math.random() > 0.95) {
                         dom.status.innerText = phrases[Math.floor(Math.random() * phrases.length)];
                     }
                 }
             }, 50);
         }
 
-        // --- Mostrar la Escena ---
+        // --- Mostrar la Escena y Generar Rosa ---
         function showScene() {
+            // Ocultar carga, mostrar escena
             dom.loader.style.opacity = '0';
             setTimeout(() => {
                 dom.loader.remove();
                 dom.scene.style.opacity = '1';
                 dom.instructions.style.opacity = '1';
+
+                // --- GENERAR LA ROSA DE BLOQUES ---
+                // Iterar sobre la estructura definida arriba
+                roseStructure.forEach(data => {
+                    // Esperar un poco más para que la escena aparezca antes de los bloques
+                    const delayedStart = 500; 
+                    createBlock(data[0], data[1], data[2], data[3], data[4] + delayedStart);
+                });
+
                 // Iniciar el bucle de renderizado optimizado
                 requestAnimationFrame(updateRotation);
             }, 500);
         }
 
-        // --- Lógica de Interacción Unificada (Mouse y Táctil) ---
+        // --- Lógica de Interacción (Unificada: Mouse y Táctil) ---
         let isDragging = false;
         let lastX = 0;
         let lastY = 0;
@@ -263,13 +374,11 @@
             const pos = getEventPos(e);
             lastX = pos.x;
             lastY = pos.y;
-            // Evita comportamientos extraños en móvil
-            if(e.type === 'touchstart') e.preventDefault(); 
+            if(e.type === 'touchstart') e.preventDefault(); // Evitar scroll en móvil
         }
 
         function onMove(e) {
             if (!isDragging) return;
-            
             const pos = getEventPos(e);
             const deltaX = pos.x - lastX;
             const deltaY = pos.y - lastY;
@@ -278,7 +387,7 @@
             targetRotX -= deltaY * sensitivity; // Invertido para naturalidad
 
             // Limitar rotación vertical (X) para no "dar la vuelta"
-            targetRotX = Math.max(-50, Math.min(50, targetRotX));
+            targetRotX = Math.max(-60, Math.min(60, targetRotX));
 
             lastX = pos.x;
             lastY = pos.y;
@@ -288,26 +397,21 @@
             isDragging = false;
         }
 
-        // Eventos de Mouse
+        // Eventos Mouse
         window.addEventListener('mousedown', onStart);
         window.addEventListener('mousemove', onMove);
         window.addEventListener('mouseup', onEnd);
 
-        // Eventos Táctiles (móvil, con { passive: false } para preventDefault)
+        // Eventos Táctiles (móvil) con { passive: false } para preventDefault
         window.addEventListener('touchstart', onStart, { passive: false });
         window.addEventListener('touchmove', onMove, { passive: false });
         window.addEventListener('touchend', onEnd);
 
 
-        // --- Bucle de Renderizado (Suavizado con Lerp) ---
+        // --- Bucle de Renderizado Suavizado (Lerp) ---
         // Lerp: valor_actual = valor_actual + (valor_objetivo - valor_actual) * suavizado
         function updateRotation() {
-            if (!isDragging) {
-                // Si no arrastras, vuelve suavemente a la inclinación X base
-                targetRotX += (-15 - targetRotX) * (smoothness * 0.2);
-            }
-
-            // Interpolación lineal para suavizar
+            // Interpolación lineal (Lerp) para suavizar
             currentRotY += (targetRotY - currentRotY) * smoothness;
             currentRotX += (targetRotX - currentRotX) * smoothness;
 
