@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Legendary Rose - Optimized</title>
+    <title>Legendary Voxel Rose - For Her</title>
     <style>
         :root {
-            --bg-color: #0d0d0d;
-            --block-size: 11px; /* Un poco más pequeña para ganar rendimiento */
-            --red-f: #ff1a1a; --red-t: #ff4d4d; --red-s: #990000;
-            --green-f: #2eb82e; --green-t: #5cd65c; --green-s: #145214;
+            --bg-color: #1a1a1a; /* Fondo oscuro y elegante */
+            --bar-color: #ff3333; /* Rojo intenso de carga */
+            --rare-color: #ffaa00; /* Dorado Mítico */
+            --mc-text-shadow: 2px 2px 0px #000;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; touch-action: none; }
@@ -18,164 +18,343 @@
             height: 100vh;
             background-color: var(--bg-color);
             color: white;
-            font-family: 'Courier New', monospace;
+            font-family: 'Courier New', monospace; /* Tipografía tipo MC */
             display: flex;
             justify-content: center;
             align-items: center;
             overflow: hidden;
+            user-select: none;
         }
 
-        /* Pantalla de carga */
+        /* --- Pantalla de Carga (Estilo Crafteo) --- */
         #loader {
             position: absolute;
             text-align: center;
             z-index: 100;
+            transition: opacity 0.5s ease;
             width: 100%;
         }
 
-        .loading-bar-container {
-            width: 200px; height: 10px;
-            border: 2px solid white;
-            margin: 15px auto;
-            background: rgba(0,0,0,0.5);
+        #status {
+            font-weight: 300;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            text-shadow: var(--mc-text-shadow);
         }
 
-        #bar { width: 0%; height: 100%; background: #ff3333; }
+        .loading-bar-container {
+            width: 250px;
+            height: 12px;
+            border: 2px solid white;
+            margin: 0 auto;
+            position: relative;
+            background: rgba(0,0,0,0.6);
+        }
 
-        /* Escena 3D */
+        #bar {
+            width: 0%;
+            height: 100%;
+            background-color: var(--bar-color);
+            transition: width 0.1s linear;
+        }
+
+        /* --- Contenedor Principal (Scene) --- */
         .scene {
-            perspective: 1000px;
-            opacity: 0;
-            transition: opacity 1s;
-            will-change: opacity;
+            width: 100vw;
+            height: 100vh;
+            perspective: 1500px; /* Mayor profundidad para el modelo denso */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0; /* Invisible hasta carga completa */
+            transition: opacity 1s ease;
         }
 
         #pivot {
             position: relative;
             transform-style: preserve-3d;
+            /* Inclinación base optimizada */
             transform: rotateX(-15deg) rotateY(45deg);
             will-change: transform;
         }
 
-        /* El Cubo Voxel */
-        .block {
+        /* --- La Obra Maestra (Planos Cruzados con Textura de Alta Definición) --- */
+        .flower-model {
             position: absolute;
-            width: var(--block-size);
-            height: var(--block-size);
             transform-style: preserve-3d;
-            will-change: transform;
+            /* Centrar el modelo */
+            margin-left: -100px; /* -(width/2) */
+            margin-top: -200px; /* -height */
+            width: 200px;
+            height: 200px;
         }
 
-        .face {
+        .sprite-plane {
             position: absolute;
-            width: 100%; height: 100%;
-            backface-visibility: hidden; /* CRÍTICO: No renderiza lo que no se ve */
+            width: 100%;
+            height: 100%;
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            image-rendering: pixelated; /* ¡Look Minecraft! */
+            
+            /* --- GENERADOR DE TEXTURA MAESTRA (CSS Puro) --- */
+            /* Recreando la geometría densa, los pétalos abiertos y el tallo curvado de las imágenes */
+            background-image: 
+                /* 1. Pétalos Exteriores (Abiertos y Desordenados) */
+                radial-gradient(circle at 60% 20%, #cc0000 0%, transparent 15%),
+                radial-gradient(circle at 40% 25%, #cc0000 0%, transparent 15%),
+                radial-gradient(circle at 75% 35%, #990000 0%, transparent 12%),
+                radial-gradient(circle at 25% 35%, #990000 0%, transparent 12%),
+                
+                /* 2. Cuerpo Principal del Capullo (Denso y Voluminoso) */
+                radial-gradient(circle at 50% 30%, #ff1a1a 0%, #cc0000 35%, #800000 50%, transparent 60%),
+                
+                /* 3. Base del Capullo (Verde a Rojo) */
+                linear-gradient(to top, #1a991a 0%, #0d660d 15%, transparent 20%),
+                
+                /* 4. Tallo Curvado y Orgánico */
+                bezier-gradient(from 50% 100% to 50% 20%, control 60% 80%, #0d660d 0%, #1a991a 60%, transparent 100%),
+                
+                /* 5. Hojas Detalladas */
+                radial-gradient(ellipse at 70% 60%, #1a991a 0%, #0d660d 30%, transparent 40%),
+                radial-gradient(ellipse at 30% 70%, #1a991a 0%, #0d660d 30%, transparent 40%),
+                
+                /* 6. Espinas */
+                radial-gradient(circle at 52% 75%, #5d2e0a 0%, transparent 3%),
+                radial-gradient(circle at 48% 65%, #5d2e0a 0%, transparent 3%),
+                radial-gradient(circle at 51% 55%, #5d2e0a 0%, transparent 3%);
+
+            /* Efecto de volumen sutil */
+            filter: drop-shadow(0 0 10px rgba(255,0,0,0.4));
         }
 
-        .f { transform: translateZ(5.5px); }
-        .bk { transform: rotateY(180deg) translateZ(5.5px); }
-        .l { transform: rotateY(-90deg) translateZ(5.5px); }
-        .r { transform: rotateY(90deg) translateZ(5.5px); }
-        .t { transform: rotateX(90deg) translateZ(5.5px); }
-        .bm { transform: rotateX(-90deg) translateZ(5.5px); }
+        /* Plano 1: Normal */
+        .p1 { transform: rotateY(0deg); }
+        /* Plano 2: Girado 60 grados para dar volumen orgánico */
+        .p2 { transform: rotateY(60deg); }
+        /* Plano 3: Girado -60 grados para cerrar el volumen */
+        .p3 { transform: rotateY(-60deg); }
 
-        /* Colores */
-        .r-b .face { background: var(--red-f); } .r-b .t { background: var(--red-t); } .r-b .l, .r-b .r { background: var(--red-s); }
-        .g-b .face { background: var(--green-f); } .g-b .t { background: var(--green-t); } .g-b .l, .g-b .r { background: var(--green-s); }
+        /* --- Sombra en el suelo para realismo --- */
+        .shadow {
+            position: absolute;
+            width: 150px; height: 150px;
+            background: radial-gradient(circle, rgba(0,0,0,0.7) 0%, transparent 70%);
+            transform: rotateX(90deg) translateZ(-20px);
+            margin-left: -75px;
+            margin-top: -75px;
+            pointer-events: none;
+        }
 
+        /* --- Texto de Instrucciones (Mítico) --- */
         #instructions {
             position: absolute;
-            bottom: 20px;
+            bottom: 30px;
             text-align: center;
-            background: rgba(0,0,0,0.8);
-            padding: 15px;
-            border: 1px solid gold;
+            width: 90%;
+            max-width: 450px;
+            pointer-events: none;
             opacity: 0;
-            transition: 1s;
+            transition: opacity 1s ease;
+            background: rgba(0,0,0,0.7);
+            padding: 20px;
+            border: 3px solid white;
+            box-shadow: 0 0 15px rgba(255,255,255,0.2);
         }
+
+        #instructions h1 {
+            color: var(--rare-color); /* Dorado */
+            font-size: 1.4rem;
+            margin-bottom: 8px;
+            font-weight: bold;
+            text-transform: uppercase;
+            text-shadow: var(--mc-text-shadow);
+            letter-spacing: 1px;
+        }
+
+        #instructions p {
+            font-size: 1rem;
+            color: #eee;
+            line-height: 1.4;
+        }
+
+        /* Ajuste para pantallas muy pequeñas */
+        @media (max-height: 500px) {
+            #instructions { bottom: 10px; padding: 15px; }
+            #instructions h1 { font-size: 1.2rem; }
+            #instructions p { font-size: 0.9rem; }
+        }
+
     </style>
 </head>
 <body>
 
     <div id="loader">
-        <h2 id="status">Cargando...</h2>
-        <div class="loading-bar-container"><div id="bar"></div></div>
+        <h2 id="status">Crafteando obra maestra...</h2>
+        <div class="loading-bar-container">
+            <div id="bar"></div>
+        </div>
     </div>
 
     <div class="scene" id="mainScene">
-        <div id="pivot"></div>
+        <div id="pivot">
+            <div class="flower-model">
+                <div class="sprite-plane p1"></div>
+                <div class="sprite-plane p2"></div>
+                <div class="sprite-plane p3"></div>
+            </div>
+            <div class="shadow"></div>
+        </div>
     </div>
 
     <div id="instructions">
-        <h1 style="color: gold; font-size: 1.2rem;">[RARE ITEM]</h1>
-        <p>Para la persona más especial.</p>
+        <h1>[LEGENDARY ITEM]</h1>
+        <p>Una rosa única, crafteada con amor para alguien tan especial como tú.</p>
+        <p style="font-size: 0.8rem; color: #aaa; margin-top: 8px;">(Arrastra para explorar cada pétalo)</p>
     </div>
 
     <script>
-        const pivot = document.getElementById('pivot');
-        const bar = document.getElementById('bar');
-
-        // Estructura simplificada pero visualmente densa
-        const roseBlocks = [];
-        // Tallo
-        for(let i=0; i<10; i++) roseBlocks.push({x: Math.sin(i*0.3), y: i, z: 0, c: 'g-b'});
-        // Hojas
-        roseBlocks.push({x: 1, y: 3, z: 0, c: 'g-b'}, {x: 2, y: 4, z: 0, c: 'g-b'}, {x: -1, y: 5, z: 0, c: 'g-b'});
-        // Capullo (Estructura de diamante)
-        for(let y=10; y<15; y++) {
-            let r = y < 13 ? y-9 : 15-y;
-            for(let x=-r; x<=r; x++) {
-                for(let z=-r; z<=r; z++) {
-                    if(Math.abs(x)+Math.abs(z) <= r) roseBlocks.push({x, y, z, c: 'r-b'});
-                }
-            }
-        }
-
-        let currentIdx = 0;
-        function chunkedBuild() {
-            const chunkSize = 15; // Crea 15 bloques por vez
-            for(let i=0; i<chunkSize && currentIdx < roseBlocks.length; i++) {
-                const b = roseBlocks[currentIdx];
-                const el = document.createElement('div');
-                el.className = `block ${b.c}`;
-                el.style.transform = `translate3d(${b.x * 12}px, ${-b.y * 12}px, ${b.z * 12}px)`;
-                el.innerHTML = '<div class="face f"></div><div class="face bk"></div><div class="face l"></div><div class="face r"></div><div class="face t"></div><div class="face bm"></div>';
-                pivot.appendChild(el);
-                currentIdx++;
-            }
-
-            bar.style.width = (currentIdx / roseBlocks.length * 100) + '%';
-
-            if(currentIdx < roseBlocks.length) {
-                requestAnimationFrame(chunkedBuild); // Siguiente lote en el siguiente frame
-            } else {
-                startScene();
-            }
-        }
-
-        function startScene() {
-            document.getElementById('loader').style.display = 'none';
-            document.getElementById('mainScene').style.opacity = '1';
-            document.getElementById('instructions').style.opacity = '1';
-            animate();
-        }
-
-        let rotY = 45, rotX = -15, tRotY = 45, tRotX = -15;
-        window.onpointermove = e => {
-            tRotY += e.movementX * 0.5;
-            tRotX -= e.movementY * 0.5;
+        // --- Elementos del DOM ---
+        const dom = {
+            loader: document.getElementById('loader'),
+            bar: document.getElementById('bar'),
+            status: document.getElementById('status'),
+            scene: document.getElementById('mainScene'),
+            pivot: document.getElementById('pivot'),
+            instructions: document.getElementById('instructions')
         };
 
-        function animate() {
-            rotY += (tRotY - rotY) * 0.1;
-            rotX += (tRotX - rotX) * 0.1;
-            pivot.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
-            requestAnimationFrame(animate);
+        // --- Configuración de Rotación Suavizada (Física) ---
+        let targetRotY = 45;
+        let targetRotX = -15;
+        let currentRotY = 45;
+        let currentRotX = -15;
+        
+        // Sensibilidad táctil/mouse (ajusta si lo sientes muy rápido/lento)
+        const sensitivity = 0.45; 
+        // Suavizado (0.01 a 1, más bajo es más suave/lento)
+        const smoothness = 0.12; 
+
+        // --- Simulación de Carga (5 segundos para la obra maestra) ---
+        function simulateLoading() {
+            let progress = 0;
+            const startTime = Date.now();
+            const duration = 5000; // 5 segundos
+
+            const phrases = [
+                "Generando chunks...",
+                "Buscando el bioma místico...",
+                "Crafteando pétalos voxel por voxel...",
+                "Inyectando amor en el código...",
+                "Casi listo..."
+            ];
+
+            const interval = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                progress = (elapsed / duration) * 100;
+
+                if (progress >= 100) {
+                    dom.bar.style.width = '100%';
+                    dom.status.innerText = "¡Crafteado!";
+                    dom.status.style.color = "var(--rare-color)";
+                    clearInterval(interval);
+                    setTimeout(showScene, 600);
+                } else {
+                    dom.bar.style.width = progress + '%';
+                    // Cambiar frase aleatoriamente
+                    if (Math.random() > 0.96) {
+                        dom.status.innerText = phrases[Math.floor(Math.random() * phrases.length)];
+                    }
+                }
+            }, 50);
         }
 
-        // Iniciar construcción después de un segundo
-        setTimeout(chunkedBuild, 1000);
+        // --- Mostrar la Escena ---
+        function showScene() {
+            dom.loader.style.opacity = '0';
+            setTimeout(() => {
+                dom.loader.remove();
+                dom.scene.style.opacity = '1';
+                dom.instructions.style.opacity = '1';
+                // Iniciar el bucle de renderizado optimizado
+                requestAnimationFrame(updateRotation);
+            }, 500);
+        }
+
+        // --- Lógica de Interacción Unificada (Mouse y Táctil) ---
+        let isDragging = false;
+        let lastX = 0;
+        let lastY = 0;
+
+        function getEventPos(e) {
+            if (e.touches && e.touches.length > 0) {
+                return { x: e.touches[0].pageX, y: e.touches[0].pageY };
+            }
+            return { x: e.pageX, y: e.pageY };
+        }
+
+        function onStart(e) {
+            isDragging = true;
+            const pos = getEventPos(e);
+            lastX = pos.x;
+            lastY = pos.y;
+            if(e.type === 'touchstart') e.preventDefault(); // Evitar scroll en móvil
+        }
+
+        function onMove(e) {
+            if (!isDragging) return;
+            const pos = getEventPos(e);
+            const deltaX = pos.x - lastX;
+            const deltaY = pos.y - lastY;
+
+            targetRotY += deltaX * sensitivity;
+            targetRotX -= deltaY * sensitivity; // Invertido para naturalidad
+
+            // Limitar rotación vertical (X) para no "dar la vuelta"
+            targetRotX = Math.max(-60, Math.min(60, targetRotX));
+
+            lastX = pos.x;
+            lastY = pos.y;
+        }
+
+        function onEnd() {
+            isDragging = false;
+        }
+
+        // Eventos Mouse
+        window.addEventListener('mousedown', onStart);
+        window.addEventListener('mousemove', onMove);
+        window.addEventListener('mouseup', onEnd);
+
+        // Eventos Táctiles (móvil) con { passive: false } para preventDefault
+        window.addEventListener('touchstart', onStart, { passive: false });
+        window.addEventListener('touchmove', onMove, { passive: false });
+        window.addEventListener('touchend', onEnd);
+
+
+        // --- Bucle de Renderizado Suavizado (Lerp) ---
+        // Lerp: valor_actual = valor_actual + (valor_objetivo - valor_actual) * suavizado
+        function updateRotation() {
+            if (!isDragging) {
+                // Si no arrastras, vuelve suavemente a la inclinación X base
+                targetRotX += (-15 - targetRotX) * (smoothness * 0.2);
+            }
+
+            // Interpolación lineal (Lerp) para suavizar
+            currentRotY += (targetRotY - currentRotY) * smoothness;
+            currentRotX += (targetRotX - currentRotX) * smoothness;
+
+            // Aplicar transformación 3D al pivot
+            dom.pivot.style.transform = `rotateX(${currentRotX}deg) rotateY(${currentRotY}deg)`;
+
+            // Siguiente frame
+            requestAnimationFrame(updateRotation);
+        }
+
+        // --- Iniciar todo ---
+        simulateLoading();
+
     </script>
 </body>
 </html>
-
