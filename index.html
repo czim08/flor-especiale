@@ -3,157 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Un regalo pixelado</title>
+    <title>Rosa Pixelada en Construcción</title>
     <style>
+        :root {
+            --bg: #0a0a0a;
+            --rose-red: #e63946;
+            --leaf-green: #2b9348;
+            --stem-green: #004b23;
+        }
+
         body {
-            background-color: #121212;
+            background-color: var(--bg);
+            margin: 0;
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
             overflow: hidden;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: white;
-        }
-
-        .container {
-            perspective: 1200px;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        /* Contenedor de la flor con interactividad */
-        .flower-wrapper {
-            position: relative;
-            cursor: pointer;
-            transition: transform 0.3s ease;
-        }
-
-        .flower-wrapper:hover {
-            transform: scale(1.1);
-        }
-
-        .flower {
-            position: relative;
-            width: 80px;
-            height: 80px;
-            transform-style: preserve-3d;
-            animation: rotate 10s linear infinite;
-        }
-
-        @keyframes rotate {
-            from { transform: rotateY(0deg) rotateX(-10deg); }
-            to { transform: rotateY(360deg) rotateX(-10deg); }
-        }
-
-        /* Cartel secreto de Minecraft */
-        .tooltip {
-            position: absolute;
-            top: -60px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: rgba(0, 0, 0, 0.85);
-            border: 3px solid #5a5a5a;
-            padding: 8px 15px;
-            color: #ffffff;
             font-family: 'Courier New', monospace;
-            white-space: nowrap;
-            opacity: 0;
-            transition: opacity 0.4s ease, top 0.4s ease;
-            pointer-events: none;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            touch-action: none;
+        }
+
+        /* Pantalla de carga */
+        #loader {
+            position: absolute;
+            color: white;
+            text-align: center;
             z-index: 100;
+            transition: opacity 1s ease;
         }
 
-        .flower-wrapper:hover .tooltip {
-            opacity: 1;
-            top: -80px;
+        .scene {
+            width: 400px;
+            height: 400px;
+            perspective: 1200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0; /* Invisible hasta que termine la carga */
+            transition: opacity 2s ease;
         }
 
-        /* Cubos (Píxeles 3D) */
+        #pivot {
+            position: relative;
+            width: 0;
+            height: 0;
+            transform-style: preserve-3d;
+            transform: rotateX(-20deg) rotateY(45deg);
+        }
+
         .pixel {
             position: absolute;
-            width: 20px;
-            height: 20px;
+            width: 10px;
+            height: 10px;
             transform-style: preserve-3d;
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         .face {
             position: absolute;
-            width: 20px;
-            height: 20px;
-            border: 0.5px solid rgba(0,0,0,0.2);
+            width: 10px;
+            height: 10px;
+            border: 0.1px solid rgba(0,0,0,0.2);
         }
 
-        .front  { transform: translateZ(10px); }
-        .back   { transform: rotateY(180deg) translateZ(10px); }
-        .left   { transform: rotateY(-90deg) translateZ(10px); }
-        .right  { transform: rotateY(90deg) translateZ(10px); }
-        .top    { transform: rotateX(90deg) translateZ(10px); }
-        .bottom { transform: rotateX(-90deg) translateZ(10px); }
+        .f { transform: translateZ(5px); }
+        .bk { transform: rotateY(180deg) translateZ(5px); }
+        .l { transform: rotateY(-90deg) translateZ(5px); }
+        .r { transform: rotateY(90deg) translateZ(5px); }
+        .t { transform: rotateX(90deg) translateZ(5px); }
+        .bm { transform: rotateX(-90deg) translateZ(5px); }
 
-        /* Colores con degradados para realismo */
-        .red .face      { background: radial-gradient(#ff4d4d, #b30000); }
-        .darkred .face  { background: radial-gradient(#cc0000, #660000); }
-        .green .face    { background: radial-gradient(#45ed45, #1d821d); }
-        .darkgreen .face{ background: radial-gradient(#2eb82e, #0d4d0d); }
-
-        /* Estructura de la flor */
-        .p1 { transform: translate3d(0, 40px, 0); }
-        .p2 { transform: translate3d(0, 20px, 0); }
-        .p3 { transform: translate3d(0, 0px, 0); }
-        .p4 { transform: translate3d(0, -20px, 0); } 
-        .p5 { transform: translate3d(20px, -20px, 0); }
-        .p6 { transform: translate3d(-20px, -20px, 0); }
-        .p7 { transform: translate3d(0, -20px, 20px); }
-        .p8 { transform: translate3d(0, -20px, -20px); }
-        .p9 { transform: translate3d(0, -40px, 0); }
-        .p10 { transform: translate3d(20px, 20px, 0); }
-        .p11 { transform: translate3d(-20px, 10px, 0); }
-
-        h2 {
-            margin-top: 80px;
-            font-weight: 300;
-            letter-spacing: 2px;
-            background: linear-gradient(to right, #ff4d4d, #ff9999);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .hint {
-            font-size: 0.8rem;
-            color: #555;
-            margin-top: 10px;
+        .ui-text {
+            position: absolute;
+            top: 20px;
+            color: white;
+            text-align: center;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 1s ease;
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="flower-wrapper">
-            <div class="tooltip">✨ Tú eres muy especial ✨</div>
-            
-            <div class="flower">
-                <div class="pixel green p1"><div class="face front"></div><div class="face back"></div><div class="face left"></div><div class="face right"></div><div class="face top"></div><div class="face bottom"></div></div>
-                <div class="pixel green p2"><div class="face front"></div><div class="face back"></div><div class="face left"></div><div class="face right"></div><div class="face top"></div><div class="face bottom"></div></div>
-                <div class="pixel green p3"><div class="face front"></div><div class="face back"></div><div class="face left"></div><div class="face right"></div><div class="face top"></div><div class="face bottom"></div></div>
-                <div class="pixel darkgreen p10"><div class="face front"></div><div class="face back"></div><div class="face left"></div><div class="face right"></div><div class="face top"></div><div class="face bottom"></div></div>
-                <div class="pixel darkgreen p11"><div class="face front"></div><div class="face back"></div><div class="face left"></div><div class="face right"></div><div class="face top"></div><div class="face bottom"></div></div>
-                <div class="pixel red p4"><div class="face front"></div><div class="face back"></div><div class="face left"></div><div class="face right"></div><div class="face top"></div><div class="face bottom"></div></div>
-                <div class="pixel darkred p5"><div class="face front"></div><div class="face back"></div><div class="face left"></div><div class="face right"></div><div class="face top"></div><div class="face bottom"></div></div>
-                <div class="pixel darkred p6"><div class="face front"></div><div class="face back"></div><div class="face left"></div><div class="face right"></div><div class="face top"></div><div class="face bottom"></div></div>
-                <div class="pixel darkred p7"><div class="face front"></div><div class="face back"></div><div class="face left"></div><div class="face right"></div><div class="face top"></div><div class="face bottom"></div></div>
-                <div class="pixel darkred p8"><div class="face front"></div><div class="face back"></div><div class="face left"></div><div class="face right"></div><div class="face top"></div><div class="face bottom"></div></div>
-                <div class="pixel red p9"><div class="face front"></div><div class="face back"></div><div class="face left"></div><div class="face right"></div><div class="face top"></div><div class="face bottom"></div></div>
-            </div>
+    <div id="loader">
+        <h2 id="status">Generando terreno...</h2>
+        <div style="width: 200px; height: 10px; border: 1px solid white; margin: 0 auto;">
+            <div id="bar" style="width: 0%; height: 100%; background: var(--rose-red); transition: width 5s linear;"></div>
         </div>
-
-        <h2>UNA FLOR PARA OTRA FLOR</h2>
-        <p class="hint">(Pasa el mouse sobre la flor o tócala)</p>
     </div>
 
-</body>
-</html>
+    <div class="ui-text" id="instructions">
+        <h1 style="color: var(--rose-red);">UNA ROSA PARA TI</h1>
+        <p>Arrastra para explorar cada pétalo</p>
+    </div>
+
+    <div class="scene" id="mainScene">
+        <div id="pivot"></div>
+    </div>
+
+<script>
+    const pivot = document.getElementById('pivot');
+    const loader = document.getElementById('loader');
+    const scene = document.getElementById('mainScene');
+    const bar = document.getElementById('bar');
+    const instructions = document.getElementById('instructions');
+
+    let rotY = 45;
+    let rotX = -20;
+
+    // --- GENERADOR DE BLOQUES ---
+    function createPixel(x, y, z, color, delay) {
+        const pixel = document.createElement('div');
+        pixel.className = 'pixel';
+        // Empiezan desde el centro y escalados a 0
+        pixel.style.transform = `translate3d(0, 0, 0) scale(0)`;
+        
+        const faces = ['f', 'bk', 'l', 'r', 't', 'bm'];
+        faces.forEach(face => {
+            const div = document.createElement('div');
+            div.className = `face ${face}`;
+            div.style.backgroundColor = color;
+            pixel.appendChild(div);
+        });
+
+        pivot.appendChild(pixel);
+
+        // Animación de aparición con retraso
+        setTimeout(() => {
+            pixel.style.transform = `translate3d(${x}px, ${y}px, ${z}px) scale(1)`;
+        }, delay);
+    }
+
+    // --- SECUENCIA DE CONSTRUCCIÓN ---
+    async function startSequence() {
+        // 1. Iniciar barra de carga
+        setTimeout(() => bar.style.width = "100%", 100);
+
+        // 2. Esperar 5 segundos
+        await new Promise(r => setTimeout(r, 5000));
+        
+        loader.style.opacity = "0";
+        setTimeout(() => loader.remove(), 1000);
+
+        // 3. Mostrar escena
+        scene.style.opacity = "1";
+        instructions.style.opacity = "1";
+
+        let currentDelay = 0;
+
+        // Construir Tallo (15 bloques)
+        for (let y = 150; y >= 0; y -= 10) {
+            createPixel(0, y, 0, 'var(--stem-green)', currentDelay);
+            currentDelay += 50; 
+        }
+
+        // Construir Hojas (10 bloques)
+        for (let i = 0; i < 50; i += 10) {
+            createPixel(i + 10, 80 - i/2, 0, 'var(--leaf-green)', currentDelay);
+            createPixel(-i - 10, 110 - i/2, 0, 'var(--leaf-green)', currentDelay);
+            currentDelay += 30;
+        }
+
+        // Construir Capullo (+1000
