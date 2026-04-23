@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rosa Pixelada en Construcción</title>
+    <title>Rosa 3D - Generación Activa</title>
     <style>
         :root {
-            --bg: #0a0a0a;
-            --rose-red: #e63946;
-            --leaf-green: #2b9348;
-            --stem-green: #004b23;
+            --bg: #050505;
+            --rose-red: #ff002b;
+            --stem-green: #1a7431;
         }
 
         body {
@@ -21,7 +20,7 @@
             align-items: center;
             overflow: hidden;
             font-family: 'Courier New', monospace;
-            touch-action: none;
+            perspective: 1000px;
         }
 
         /* Pantalla de carga */
@@ -30,49 +29,42 @@
             color: white;
             text-align: center;
             z-index: 100;
-            transition: opacity 1s ease;
         }
 
         .scene {
-            width: 400px;
-            height: 400px;
-            perspective: 1200px;
+            width: 100vw;
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            opacity: 0; /* Invisible hasta que termine la carga */
-            transition: opacity 2s ease;
+            transform-style: preserve-3d;
         }
 
         #pivot {
             position: relative;
-            width: 0;
-            height: 0;
             transform-style: preserve-3d;
             transform: rotateX(-20deg) rotateY(45deg);
+            will-change: transform;
         }
 
         .pixel {
             position: absolute;
-            width: 10px;
-            height: 10px;
+            width: 8px;
+            height: 8px;
             transform-style: preserve-3d;
-            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            will-change: transform;
         }
 
         .face {
             position: absolute;
-            width: 10px;
-            height: 10px;
-            border: 0.1px solid rgba(0,0,0,0.2);
+            width: 8px;
+            height: 8px;
+            backface-visibility: hidden; /* Optimización clave */
         }
 
-        .f { transform: translateZ(5px); }
-        .bk { transform: rotateY(180deg) translateZ(5px); }
-        .l { transform: rotateY(-90deg) translateZ(5px); }
-        .r { transform: rotateY(90deg) translateZ(5px); }
-        .t { transform: rotateX(90deg) translateZ(5px); }
-        .bm { transform: rotateX(-90deg) translateZ(5px); }
+        /* Caras simplificadas para rendimiento */
+        .f { transform: translateZ(4px); background: rgba(0,0,0,0.3); }
+        .t { transform: rotateX(90deg) translateZ(4px); }
 
         .ui-text {
             position: absolute;
@@ -80,90 +72,138 @@
             color: white;
             text-align: center;
             pointer-events: none;
-            opacity: 0;
-            transition: opacity 1s ease;
+            text-shadow: 0 0 15px var(--rose-red);
+            z-index: 10;
+        }
+
+        #bar-container {
+            width: 250px;
+            height: 4px;
+            background: #222;
+            margin-top: 15px;
+        }
+
+        #bar {
+            width: 0%;
+            height: 100%;
+            background: var(--rose-red);
+            box-shadow: 0 0 10px var(--rose-red);
         }
     </style>
 </head>
 <body>
 
     <div id="loader">
-        <h2 id="status">Generando terreno...</h2>
-        <div style="width: 200px; height: 10px; border: 1px solid white; margin: 0 auto;">
-            <div id="bar" style="width: 0%; height: 100%; background: var(--rose-red); transition: width 5s linear;"></div>
-        </div>
+        <h2 id="status">INICIALIZANDO MUNDO...</h2>
+        <div id="bar-container"><div id="bar"></div></div>
     </div>
 
-    <div class="ui-text" id="instructions">
-        <h1 style="color: var(--rose-red);">UNA ROSA PARA TI</h1>
-        <p>Arrastra para explorar cada pétalo</p>
+    <div class="ui-text" id="instructions" style="display:none;">
+        <h1>PARA TI</h1>
+        <p>Arrastra para rotar la rosa</p>
     </div>
 
-    <div class="scene" id="mainScene">
+    <div class="scene">
         <div id="pivot"></div>
     </div>
 
 <script>
     const pivot = document.getElementById('pivot');
     const loader = document.getElementById('loader');
-    const scene = document.getElementById('mainScene');
     const bar = document.getElementById('bar');
     const instructions = document.getElementById('instructions');
 
     let rotY = 45;
     let rotX = -20;
 
-    // --- GENERADOR DE BLOQUES ---
-    function createPixel(x, y, z, color, delay) {
+    // Función para crear bloques optimizados
+    function createPixel(x, y, z, color) {
         const pixel = document.createElement('div');
         pixel.className = 'pixel';
-        // Empiezan desde el centro y escalados a 0
-        pixel.style.transform = `translate3d(0, 0, 0) scale(0)`;
+        pixel.style.transform = `translate3d(${x}px, ${y}px, ${z}px) scale(0)`;
         
-        const faces = ['f', 'bk', 'l', 'r', 't', 'bm'];
-        faces.forEach(face => {
+        // Solo creamos 2 caras por cubo para que 1000 bloques no maten el PC
+        // Pero se ve como un bloque sólido por el ángulo
+        const faces = ['f', 't']; 
+        faces.forEach(f => {
             const div = document.createElement('div');
-            div.className = `face ${face}`;
+            div.className = `face ${f}`;
             div.style.backgroundColor = color;
             pixel.appendChild(div);
         });
 
         pivot.appendChild(pixel);
-
-        // Animación de aparición con retraso
-        setTimeout(() => {
+        
+        // Animación suave de entrada
+        requestAnimationFrame(() => {
+            pixel.style.transition = "transform 0.6s cubic-bezier(0.17, 0.67, 0.83, 0.67)";
             pixel.style.transform = `translate3d(${x}px, ${y}px, ${z}px) scale(1)`;
-        }, delay);
+        });
     }
 
-    // --- SECUENCIA DE CONSTRUCCIÓN ---
-    async function startSequence() {
-        // 1. Iniciar barra de carga
-        setTimeout(() => bar.style.width = "100%", 100);
+    async function build() {
+        // 1. Fase de espera (5 segundos)
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += 1;
+            bar.style.width = progress + "%";
+            if(progress >= 100) clearInterval(interval);
+        }, 50);
 
-        // 2. Esperar 5 segundos
         await new Promise(r => setTimeout(r, 5000));
         
-        loader.style.opacity = "0";
-        setTimeout(() => loader.remove(), 1000);
+        // 2. Transición
+        loader.style.display = "none";
+        instructions.style.display = "block";
 
-        // 3. Mostrar escena
-        scene.style.opacity = "1";
-        instructions.style.opacity = "1";
-
-        let currentDelay = 0;
-
-        // Construir Tallo (15 bloques)
-        for (let y = 150; y >= 0; y -= 10) {
-            createPixel(0, y, 0, 'var(--stem-green)', currentDelay);
-            currentDelay += 50; 
+        // 3. Construcción del Tallo
+        for (let i = 0; i < 20; i++) {
+            createPixel(0, 160 - (i * 8), 0, 'var(--stem-green)');
+            await new Promise(r => setTimeout(r, 40));
         }
 
-        // Construir Hojas (10 bloques)
-        for (let i = 0; i < 50; i += 10) {
-            createPixel(i + 10, 80 - i/2, 0, 'var(--leaf-green)', currentDelay);
-            createPixel(-i - 10, 110 - i/2, 0, 'var(--leaf-green)', currentDelay);
-            currentDelay += 30;
-        }
+        // 4. Construcción de la Gran Rosa (1000 bloques en ráfagas)
+        for (let i = 0; i < 1000; i++) {
+            const angle = 0.2 * i;
+            const r = 1.2 * Math.sqrt(i);
+            const x = r * Math.cos(angle) * 8;
+            const z = r * Math.sin(angle) * 8;
+            const y = - (i / 15) + (r * r * 0.02);
 
-        // Construir Capullo (+1000
+            const red = 200 + Math.random() * 55;
+            createPixel(x, y, z, `rgb(${red}, 10, 40)`);
+
+            // Cada 20 bloques, damos un respiro al navegador para que no se trabe
+            if (i % 20 === 0) await new Promise(r => setTimeout(r, 10));
+        }
+    }
+
+    // Interacción de rotación
+    let isDragging = false;
+    let pX, pY;
+
+    document.addEventListener('mousedown', e => { isDragging = true; pX = e.clientX; pY = e.clientY; });
+    document.addEventListener('mousemove', e => {
+        if (!isDragging) return;
+        rotY += (e.clientX - pX) * 0.5;
+        rotX -= (e.clientY - pY) * 0.5;
+        pivot.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+        pX = e.clientX; pY = e.clientY;
+    });
+    document.addEventListener('mouseup', () => isDragging = false);
+
+    // Soporte Táctil
+    document.addEventListener('touchstart', e => { isDragging = true; pX = e.touches[0].clientX; pY = e.touches[0].clientY; });
+    document.addEventListener('touchmove', e => {
+        if (!isDragging) return;
+        rotY += (e.touches[0].clientX - pX) * 0.5;
+        rotX -= (e.touches[0].clientY - pY) * 0.5;
+        pivot.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+        pX = e.touches[0].clientX; pY = e.touches[0].clientY;
+    });
+    document.addEventListener('touchend', () => isDragging = false);
+
+    window.onload = build;
+</script>
+</body>
+</html>
