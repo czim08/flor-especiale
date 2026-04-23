@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Legendary Voxel Rose - Optimized</title>
+    <title>Minecraft Masterpiece Rose 3D - Ultra-Optimized</title>
     <style>
+        /* --- Configuración y Paleta de Minecraft --- */
         :root {
-            --bg-color: #1a1a1a; /* Fondo oscuro tipo Nether */
-            --bar-color: #ff3333; /* Rojo intenso de carga */
-            --rare-color: #ffaa00; /* Dorado Mítico */
+            --bg-color: #1a1a1a; /* Fondo oscuro tipo Nether/Cueva */
             --mc-text-shadow: 2px 2px 0px #000;
+            --bar-color: #ff3333; /* Rojo de carga */
             
             /* Tamaños */
-            --block-size: 15px; /* Bloques equilibrados */
+            --block-size: 12px; /* Bloques más pequeños para mayor definición */
             
             /* Paleta de Bloques - Degradados para profundidad por cara */
-            /* Rojo Intenso - Capullo */
+            /* Rojo - Capullo */
             --red-f: radial-gradient(#ff1a1a, #cc0000); /* Frontal */
             --red-t: #ff4d4d; /* Superior */
             --red-s: #990000; /* Lateral */
@@ -64,7 +64,7 @@
             border: 2px solid white;
             margin: 0 auto;
             position: relative;
-            background: rgba(0,0,0,0.6);
+            background: rgba(0,0,0,0.5);
         }
 
         #bar {
@@ -74,7 +74,7 @@
             transition: width 0.1s linear;
         }
 
-        /* --- Contenedor Principal (Scene) --- */
+        /* --- Contenedor Principal (Escena) --- */
         .scene {
             width: 100vw;
             height: 100vh;
@@ -91,10 +91,10 @@
             transform-style: preserve-3d;
             /* Inclinación base optimizada */
             transform: rotateX(-15deg) rotateY(45deg);
-            will-change: transform;
+            will-change: transform; /* Optimización crítica de GPU */
         }
 
-        /* --- Definición del Bloque (Cubo Voxel) --- */
+        /* --- Definición del Bloque (Cubo) --- */
         .block {
             position: absolute;
             width: var(--block-size);
@@ -148,7 +148,7 @@
             pointer-events: none;
         }
 
-        /* --- Texto Inferior (Mítico) --- */
+        /* --- Texto Inferior (Volvimos al original) --- */
         #instructions {
             position: absolute;
             bottom: 30px;
@@ -160,31 +160,27 @@
             transition: opacity 1s ease;
             background: rgba(0,0,0,0.7);
             padding: 15px;
-            border: 3px solid white;
-            box-shadow: 0 0 15px rgba(255,255,255,0.2);
+            border: 2px solid white;
         }
 
         #instructions h1 {
-            color: var(--rare-color); /* Dorado */
-            font-size: 1.4rem;
-            margin-bottom: 8px;
+            color: #ffaa00; /* Color "Rare" o "Gold" */
+            font-size: 1.1rem;
+            margin-bottom: 5px;
             font-weight: bold;
             text-transform: uppercase;
             text-shadow: var(--mc-text-shadow);
-            letter-spacing: 1px;
         }
 
         #instructions p {
-            font-size: 1rem;
-            color: #eee;
-            line-height: 1.4;
+            font-size: 0.9rem;
+            color: #ddd;
         }
 
         /* Ajuste para pantallas muy pequeñas */
         @media (max-height: 500px) {
             #instructions { bottom: 10px; padding: 10px; }
-            #instructions h1 { font-size: 1.2rem; }
-            #instructions p { font-size: 0.9rem; }
+            #instructions h1 { font-size: 1rem; }
         }
 
     </style>
@@ -193,9 +189,7 @@
 
     <div id="loader">
         <h2 id="status">Crafteando obra maestra...</h2>
-        <div class="loading-bar-container">
-            <div id="bar"></div>
-        </div>
+        <div class="loading-bar-container"><div id="bar"></div></div>
     </div>
 
     <div class="scene" id="mainScene">
@@ -205,9 +199,9 @@
     </div>
 
     <div id="instructions">
-        <h1>[LEGENDARY ITEM]</h1>
-        <p>Una rosa única, crafteada con amor para alguien tan especial como tú.</p>
-        <p style="font-size: 0.8rem; color: #aaa; margin-top: 5px;">(Arrastra para explorar cada pétalo)</p>
+        <h1>[RARE ITEM]</h1>
+        <p>ítem raro para una persona especial osea tu</p>
+        <p style="font-size: 0.75rem; color: #aaa; margin-top: 5px;">(Arrastra para explorar)</p>
     </div>
 
     <script>
@@ -215,32 +209,34 @@
         const dom = {
             loader: document.getElementById('loader'),
             bar: document.getElementById('bar'),
-            status: document.getElementById('status'),
             scene: document.getElementById('mainScene'),
             pivot: document.getElementById('pivot'),
             instructions: document.getElementById('instructions')
         };
 
-        // --- Generador de la Estructura de la Rosa (Voxel Data - OPTIMIZADA) ---
+        // --- Generador de la Estructura de la Rosa (Voxel Data) ---
         // Definimos la rosa como una lista de coordenadas [x, y, z, tipo_bloque]
         // y = 0 es el suelo. x/z centrado en 0. y crece hacia arriba.
         function generateRoseStructure() {
             const data = [];
 
-            // --- 1. TALLO CURVADO (y=0 a y=10) ---
+            // --- 1. TALLO CURVADO Y ORGÁNICO (y=0 a y=10) ---
             for (let y = 0; y <= 10; y++) {
                 // Ecuación de curvatura suave
-                let x = Math.sin(y * 0.3) * 1.2;
-                let z = Math.cos(y * 0.2) * 0.8;
+                let x = Math.sin(y * 0.3) * 1.5;
+                let z = Math.cos(y * 0.2) * 1.0;
+                
+                // Grosor del tallo (2 bloques en la base, 1 arriba)
                 data.push([Math.round(x), y, Math.round(z), 'block-green']);
+                if (y < 4) data.push([Math.round(x) + 1, y, Math.round(z), 'block-green']);
             }
 
-            // --- 2. HOJAS LATERALES (y=4, y=7) ---
-            // Hoja Inferior (y=4)
-            data.push([2, 4, 0, 'block-green'], [3, 5, 0, 'block-green'], [2, 5, 0, 'block-green']);
+            // --- 2. HOJAS LATERALES (y=2, y=5) ---
+            // Hoja Inferior (y=2)
+            data.push([2, 2, 0, 'block-green'], [3, 3, 0, 'block-green'], [2, 3, 0, 'block-green']);
             
-            // Hoja Superior (y=7)
-            data.push([-2, 7, 0, 'block-green'], [-3, 8, -1, 'block-green'], [-2, 8, -1, 'block-green']);
+            // Hoja Superior (y=5)
+            data.push([-2, 5, 0, 'block-green'], [-3, 6, -1, 'block-green'], [-2, 6, -1, 'block-green']);
 
             // --- 3. EL CAPULLO VOLUMINOSO (y=11 a y=16) ---
             const capulloBaseY = 11;
@@ -352,9 +348,9 @@
 
             const phrases = [
                 "Generando chunks...",
-                "Buscando bioma místico...",
-                "Crafteando pétalos voxel...",
-                "Inyectando amor en el código...",
+                "Plantando voxels...",
+                "Crafteando pétalos...",
+                "Encantando objeto...",
                 "Casi listo..."
             ];
 
@@ -364,16 +360,11 @@
 
                 if (progress >= 100) {
                     dom.bar.style.width = '100%';
-                    dom.status.innerText = "¡Crafteado!";
-                    dom.status.style.color = "var(--rare-color)"; // Dorado
+                    dom.bar.innerText = "¡Crafteado!";
                     clearInterval(interval);
                     setTimeout(showScene, 600);
                 } else {
                     dom.bar.style.width = progress + '%';
-                    // Cambiar frase aleatoriamente
-                    if (Math.random() > 0.95) {
-                        dom.status.innerText = phrases[Math.floor(Math.random() * phrases.length)];
-                    }
                 }
             }, 50);
         }
