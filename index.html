@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Minecraft Legendary Rose - Voxel Art</title>
+    <title>Minecraft Legendary Rose - Pro Voxel Art</title>
     <style>
         /* --- Configuración y Paleta de Minecraft --- */
         :root {
@@ -12,7 +12,7 @@
             --bar-color: #ff3333; /* Rojo de carga */
             
             /* Tamaños */
-            --block-size: 12px; /* Bloques más pequeños para mayor definición voxel */
+            --block-size: 10px; /* Bloques pequeños para máxima definición voxel */
             
             /* Paleta de Bloques - Degradados para profundidad por cara */
             /* Rojo - Capullo */
@@ -59,8 +59,8 @@
         }
 
         .loading-bar-container {
-            width: 250px;
-            height: 12px;
+            width: 280px;
+            height: 14px;
             border: 2px solid white;
             margin: 0 auto;
             position: relative;
@@ -74,11 +74,11 @@
             transition: width 0.1s linear;
         }
 
-        /* --- Contenedor Principal (Escena) --- */
+        /* --- Contenedor Principal (Scene) --- */
         .scene {
             width: 100vw;
             height: 100vh;
-            perspective: 1200px; /* Profundidad 3D */
+            perspective: 1500px; /* Mayor profundidad para el modelo denso */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -140,11 +140,11 @@
         /* --- Sombra en el suelo para realismo --- */
         .shadow-floor {
             position: absolute;
-            width: 150px; height: 150px;
+            width: 250px; height: 250px;
             background: radial-gradient(circle, rgba(0,0,0,0.6) 0%, transparent 70%);
-            transform: rotateX(90deg) translateZ(-15px);
-            margin-left: -75px;
-            margin-top: -75px;
+            transform: rotateX(90deg) translateZ(-20px);
+            margin-left: -125px;
+            margin-top: -125px;
             pointer-events: none;
         }
 
@@ -154,32 +154,35 @@
             bottom: 30px;
             text-align: center;
             width: 90%;
-            max-width: 450px;
+            max-width: 500px;
             pointer-events: none;
             opacity: 0;
             transition: opacity 1s ease;
             background: rgba(0,0,0,0.7);
-            padding: 15px;
-            border: 2px solid white;
+            padding: 20px;
+            border: 3px solid white;
+            box-shadow: 0 0 15px rgba(255,255,255,0.2);
         }
 
         #instructions h1 {
             color: #ffaa00; /* Color "Rare" o "Gold" */
-            font-size: 1.1rem;
+            font-size: 1.15rem;
             margin-bottom: 5px;
             font-weight: bold;
             text-transform: uppercase;
             text-shadow: var(--mc-text-shadow);
+            letter-spacing: 1px;
         }
 
         #instructions p {
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             color: #ddd;
+            line-height: 1.4;
         }
 
         /* Ajuste para pantallas muy pequeñas */
         @media (max-height: 500px) {
-            #instructions { bottom: 10px; padding: 10px; }
+            #instructions { bottom: 10px; padding: 15px; }
             #instructions h1 { font-size: 1rem; }
         }
 
@@ -188,7 +191,7 @@
 <body>
 
     <div id="loader">
-        <h2 id="status">Crafteando obra maestra...</h2>
+        <h2 id="status">Crafteando obra maestra Pro...</h2>
         <div class="loading-bar-container"><div id="bar"></div></div>
     </div>
 
@@ -201,7 +204,7 @@
     <div id="instructions">
         <h1>[RARE ITEM]</h1>
         <p>ítem raro para una persona especial osea tu</p>
-        <p style="font-size: 0.75rem; color: #aaa; margin-top: 5px;">(Arrastra para explorar)</p>
+        <p style="font-size: 0.75rem; color: #aaa; margin-top: 5px;">(Arrastra para explorar cada bloque)</p>
     </div>
 
     <script>
@@ -214,7 +217,7 @@
             instructions: document.getElementById('instructions')
         };
 
-        // --- Generador de la Estructura de la Rosa (Voxel Data - COMPLEJA) ---
+        // --- Generador de la Estructura de la Rosa (Voxel Data - ULTRA COMPLEJA) ---
         // Definimos la rosa como una lista de coordenadas [x, y, z, tipo_bloque]
         // y = 0 es el suelo. x/z centrado en 0. y crece hacia arriba.
         function generateRoseStructure() {
@@ -222,13 +225,14 @@
 
             // --- 1. TALLO CURVADO Y ORGÁNICO (y=0 a y=10) ---
             for (let y = 0; y <= 10; y++) {
-                // Ecuación de curvatura suave
+                // Ecuación de curvatura suave y orgánica
                 let x = Math.sin(y * 0.3) * 1.5;
                 let z = Math.cos(y * 0.2) * 1.0;
                 
                 // Grosor del tallo (2 bloques en la base, 1 arriba)
                 data.push([Math.round(x), y, Math.round(z), 'block-green']);
                 if (y < 4) data.push([Math.round(x) + 1, y, Math.round(z), 'block-green']);
+                // --- Eliminadas las espinas marrones ---
             }
 
             // --- 2. HOJAS LATERALES DETALLADAS (y=2, y=5) ---
@@ -250,7 +254,7 @@
                 }
             }
 
-            // --- 3. EL CAPULLO VOLUMINOSO (y=11 a y=16) ---
+            // --- 3. EL CAPULLO VOLUMINOSO Y HUECO (y=11 a y=16) ---
             const capulloBaseY = 11;
 
             // Capas del capullo (Nivel por Nivel)
@@ -280,10 +284,11 @@
             ];
             petalCoordsY12.forEach(p => data.push([p[0], capulloBaseY + 1, p[1], 'block-red']));
 
-            // Nivel 3 (y=13): Capa Superior y Pétalos en Apertura
+            // Nivel 3 (y=13): Capa Superior y Pétalos en Apertura (HUECO EN EL CENTRO)
             // Capa Interior (Núcleo)
             for (let x = -1; x <= 1; x++) {
                 for (let z = -1; z <= 1; z++) {
+                    if (x===0 && z===0) continue; // Salta el centro para que sea hueco
                     data.push([x, capulloBaseY + 2, z, 'block-red']);
                 }
             }
@@ -300,10 +305,11 @@
                 data.push([p[0], capulloBaseY + 2 + yOffset, p[1], 'block-red']);
             });
 
-            // Nivel 4/5 (y=14/15): El Núcleo Pétalo por Pétalo
-            data.push([0, capulloBaseY + 3, 0, 'block-red']);
+            // Nivel 4/5 (y=14/15): El Núcleo Pétalo por Pétalo (HUECO)
+            // --- Hecho hueco eliminando la parte central ---
             data.push([1, capulloBaseY + 3, 1, 'block-red']);
             data.push([-1, capulloBaseY + 3, -1, 'block-red']);
+            data.push([0, capulloBaseY + 3, 0, 'block-red']); // Pétalo central alto
             
             // Pétalos más altos y centrales (Núcleo cerrado)
             data.push([0, capulloBaseY + 4, 0, 'block-red']);
@@ -361,8 +367,8 @@
             const phrases = [
                 "Generando chunks...",
                 "Plantando voxels...",
-                "Crafteando pétalos...",
-                "Encantando objeto...",
+                "Crafteando pétalos Pro...",
+                "Inyectando amor en el código...",
                 "Casi listo..."
             ];
 
@@ -372,11 +378,16 @@
 
                 if (progress >= 100) {
                     dom.bar.style.width = '100%';
-                    dom.bar.innerText = "¡Crafteado!";
+                    dom.status.innerText = "¡Crafteado!";
+                    dom.status.style.color = "#ffaa00"; // Dorado
                     clearInterval(interval);
                     setTimeout(showScene, 600);
                 } else {
                     dom.bar.style.width = progress + '%';
+                    // Cambiar frase aleatoriamente
+                    if (Math.random() > 0.95) {
+                        dom.status.innerText = phrases[Math.floor(Math.random() * phrases.length)];
+                    }
                 }
             }, 50);
         }
@@ -390,14 +401,22 @@
                 dom.scene.style.opacity = '1';
                 dom.instructions.style.opacity = '1';
 
-                // --- GENERAR LA ROSA MAESTRA DE BLOQUES ---
-                // Iterar sobre la estructura generada dinámicamente
+                // --- GENERAR LA ROSA MAESTRA DE BLOQUES (EN CHUNKS) ---
+                // Iterar sobre la estructura generada dinámicamente en lotes
                 // Usamos un retraso progresivo para la animación de aparición
                 let delayCount = 0;
-                roseStructure.forEach(data => {
-                    createBlock(data[0], data[1], data[2], data[3], delayCount * 40);
-                    delayCount++;
-                });
+                let chunkCount = 0;
+                const chunkSize = 10; // Crea 10 bloques por chunk para fluidez
+
+                for (let i = 0; i < roseStructure.length; i += chunkSize) {
+                    const chunkData = roseStructure.slice(i, i + chunkSize);
+                    setTimeout(() => {
+                        chunkData.forEach(data => {
+                            createBlock(data[0], data[1], data[2], data[3], (chunkCount * 100) + Math.random()*20);
+                        });
+                        chunkCount++;
+                    }, chunkCount * 50); // Crea un chunk cada 50ms
+                }
 
                 // Iniciar el bucle de renderizado optimizado
                 requestAnimationFrame(updateRotation);
