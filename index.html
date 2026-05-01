@@ -3,28 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minecraft Rose 3D</title>
+    <title>Rare Item - Minecraft Rose</title>
     <style>
-        body { margin: 0; background-color: #1a1a1a; overflow: hidden; font-family: 'Courier New', Courier, monospace; }
+        body { margin: 0; background: radial-gradient(circle, #2c3e50, #000000); overflow: hidden; font-family: 'Courier New', Courier, monospace; }
         #ui {
             position: absolute;
-            top: 20px;
-            width: 100%;
-            text-align: center;
-            color: #ffaa00;
-            text-shadow: 2px 2px #3f3f3f;
-            font-size: 3rem;
-            pointer-events: none;
-            text-transform: uppercase;
+            top: 40px; width: 100%; text-align: center;
+            color: #ffcc00; text-shadow: 0 0 10px #ffaa00;
+            font-size: 3rem; pointer-events: none; font-weight: bold;
         }
-        canvas { display: block; }
+        #controls {
+            position: absolute;
+            bottom: 20px; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 15px; background: rgba(255,255,255,0.1);
+            padding: 15px; border-radius: 50px; backdrop-filter: blur(5px);
+        }
+        .btn {
+            width: 30px; height: 30px; border-radius: 50%; border: 2px solid white;
+            cursor: pointer; transition: transform 0.2s;
+        }
+        .btn:hover { transform: scale(1.2); }
     </style>
 </head>
 <body>
 
     <div id="ui">RARE ITEM</div>
+    
+    <div id="controls">
+        <div class="btn" style="background: #ff2222;" onclick="changeColor(0xff2222)"></div>
+        <div class="btn" style="background: #22aaff;" onclick="changeColor(0x22aaff)"></div>
+        <div class="btn" style="background: #ff69b4;" onclick="changeColor(0xff69b4)"></div>
+        <div class="btn" style="background: #ffcc00;" onclick="changeColor(0xffcc00)"></div>
+    </div>
 
-    <!-- Importamos Three.js y OrbitControls para la interactividad -->
     <script type="importmap">
         {
             "imports": {
@@ -38,100 +49,114 @@
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-        // --- Configuración Inicial ---
+        // Escena y Cámara
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: false }); // False para look pixelado
+        camera.position.set(0, 8, 15);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
         document.body.appendChild(renderer.domElement);
 
         const controls = new OrbitControls(camera, renderer.domElement);
-        camera.position.set(10, 15, 20);
-        controls.update();
+        controls.enableDamping = true;
 
-        // Iluminación estilo Minecraft (plana pero con dirección)
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+        // Luces
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
         scene.add(ambientLight);
-        const dirLight = new THREE.DirectionalLight(0xffffff, 0.6);
-        dirLight.position.set(5, 10, 5);
-        scene.add(dirLight);
+        const pointLight = new THREE.PointLight(0xffffff, 150);
+        pointLight.position.set(0, 10, 0);
+        scene.add(pointLight);
 
-        // --- Definición de la Rosa (Matriz de Píxeles) ---
-        // 0: Vacío, 1: Tallo (Verde), 2: Flor (Rojo), 3: Centro (Rojo Oscuro)
-        const roseData = [
-            [0,0,2,2,0],
-            [0,2,3,3,2],
-            [2,3,2,2,3,2],
-            [0,2,2,2,2],
-            [0,0,1,0,0],
-            [0,1,1,0,0],
-            [0,0,1,0,0],
-            [0,0,1,1,0],
-            [0,0,1,0,0],
-            [0,0,1,0,0],
-        ].reverse(); // Invertimos para construir de abajo hacia arriba
+        // Suelo Decorativo (Espejo oscuro)
+        const ground = new THREE.Mesh(
+            new THREE.CircleGeometry(10, 32),
+            new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.1, metalness: 0.8 })
+        );
+        ground.rotation.x = -Math.PI / 2;
+        ground.position.y = -1;
+        scene.add(ground);
 
-        const colors = {
-            1: 0x3d9421, // Verde tallo
-            2: 0xff0000, // Rojo pétalo
-            3: 0x8b0000  // Rojo oscuro
-        };
+        // Estructura 3D de la Rosa
+        const flowerGroup = new THREE.Group();
+        scene.add(flowerGroup);
 
-        const geometry = new THREE.BoxGeometry(1, 1, 1);
-        const blocks = [];
+        const voxels = [
+            // Tallo (x, y, z, esTallo)
+            [0,0,0,true], [0,1,0,true], [0,2,0,true], [1,2,0,true], [0,3,0,true], [0,4,0,true], [-1,4,0,true], [0,5,0,true],
+            // Capas de pétalos (X, Y, Z)
+            [0,6,0,false], [1,6,0,false], [-1,6,0,false], [0,6,1,false], [0,6,-1,false],
+            [1,7,0,false], [-1,7,0,false], [0,7,1,false], [0,7,-1,false], [0,8,0,false],
+            [1,6,1,false], [-1,6,-1,false], [1,6,-1,false], [-1,6,1,false]
+        ];
 
-        // --- Función de Construcción ---
-        async function buildRose() {
-            for (let y = 0; y < roseData.length; y++) {
-                for (let x = 0; x < roseData[y].length; x++) {
-                    const type = roseData[y][x];
-                    if (type !== 0) {
-                        const material = new THREE.MeshStandardMaterial({ color: colors[type] });
-                        const cube = new THREE.Mesh(geometry, material);
-                        
-                        // Centrar la rosa
-                        cube.position.set(x - roseData[y].length/2, y, 0);
-                        cube.scale.set(0,0,0); // Empezar invisibles
-                        
-                        scene.add(cube);
-                        blocks.push({ mesh: cube, targetScale: 1 });
+        const geometry = new THREE.BoxGeometry(0.95, 0.95, 0.95);
+        const petalMeshes = [];
 
-                        // Efecto de delay para la construcción
-                        await new Promise(res => setTimeout(res, 50));
-                    }
-                }
+        async function init() {
+            for (const [x, y, z, isStem] of voxels) {
+                const color = isStem ? 0x2e7d32 : 0xff2222;
+                // Usamos MeshPhysicalMaterial para que el brillo se vea mejor
+                const material = new THREE.MeshPhysicalMaterial({ 
+                    color: color,
+                    emissive: isStem ? 0x000000 : color,
+                    emissiveIntensity: 0.5,
+                    roughness: 0.3
+                });
+
+                const cube = new THREE.Mesh(geometry, material);
+                cube.position.set(x, y, z);
+                cube.scale.set(0,0,0);
+                flowerGroup.add(cube);
+                
+                if (!isStem) petalMeshes.push(cube);
+
+                // Animación de escala inicial
+                setTimeout(() => {
+                    const grow = setInterval(() => {
+                        cube.scale.x += 0.1;
+                        cube.scale.y += 0.1;
+                        cube.scale.z += 0.1;
+                        if(cube.scale.x >= 1) clearInterval(grow);
+                    }, 30);
+                }, y * 100);
             }
         }
 
-        buildRose();
+        init();
 
-        // --- Animación ---
-        function animate() {
-            requestAnimationFrame(animate);
-
-            // Suavizar la aparición de los bloques
-            blocks.forEach(b => {
-                if (b.mesh.scale.x < b.targetScale) {
-                    b.mesh.scale.x += 0.1;
-                    b.mesh.scale.y += 0.1;
-                    b.mesh.scale.z += 0.1;
-                }
+        // Función global para cambiar color
+        window.changeColor = (colorHex) => {
+            petalMeshes.forEach(mesh => {
+                mesh.material.color.setHex(colorHex);
+                mesh.material.emissive.setHex(colorHex);
             });
+        };
 
-            // Rotación suave automática
-            scene.rotation.y += 0.005;
+        function animate(time) {
+            requestAnimationFrame(animate);
+            
+            // Animación de rotación y levitación
+            flowerGroup.rotation.y += 0.01;
+            flowerGroup.position.y = Math.sin(time * 0.002) * 0.5 + 0.5;
+
+            // Efecto de pulso en el brillo (emisión)
+            petalMeshes.forEach(mesh => {
+                mesh.material.emissiveIntensity = 0.5 + Math.sin(time * 0.005) * 0.3;
+            });
 
             controls.update();
             renderer.render(scene, camera);
         }
+
+        animate();
 
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
-
-        animate();
     </script>
 </body>
 </html>
