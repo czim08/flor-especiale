@@ -3,34 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rare Item for You</title>
+    <title>Rare Item - Minecraft Rose</title>
     <style>
         body { 
             margin: 0; 
-            /* Fondo cálido tipo atardecer */
-            background: linear-gradient(180deg, #ffafbd 0%, #ffc3a0 100%); 
+            /* Atardecer cálido */
+            background: linear-gradient(180deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%); 
             overflow: hidden; 
             font-family: 'Courier New', Courier, monospace; 
         }
         #ui {
             position: absolute;
             top: 40px; width: 100%; text-align: center;
-            color: #ffffff; text-shadow: 2px 2px 5px rgba(0,0,0,0.2);
-            font-size: 3rem; pointer-events: none; font-weight: bold;
-            letter-spacing: 4px;
+            color: #ffffff; text-shadow: 2px 2px 8px rgba(214, 45, 32, 0.5);
+            font-size: 3.5rem; pointer-events: none; font-weight: bold;
         }
         #controls {
             position: absolute;
             bottom: 30px; left: 50%; transform: translateX(-50%);
-            display: flex; gap: 20px; background: rgba(255,255,255,0.3);
-            padding: 12px 25px; border-radius: 50px; backdrop-filter: blur(10px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            display: flex; gap: 20px; background: rgba(255,255,255,0.4);
+            padding: 15px 30px; border-radius: 50px; backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            z-index: 10;
         }
         .btn {
-            width: 35px; height: 35px; border-radius: 50%; border: 3px solid white;
-            cursor: pointer; transition: all 0.3s ease;
+            width: 40px; height: 40px; border-radius: 50%; border: 3px solid white;
+            cursor: pointer; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .btn:hover { transform: scale(1.3); box-shadow: 0 0 15px rgba(255,255,255,0.8); }
+        .btn:hover { transform: scale(1.3); }
     </style>
 </head>
 <body>
@@ -38,10 +38,10 @@
     <div id="ui">RARE ITEM</div>
     
     <div id="controls">
-        <div class="btn" style="background: #ff4d4d;" onclick="changeColor(0xff4d4d)"></div>
-        <div class="btn" style="background: #74b9ff;" onclick="changeColor(0x74b9ff)"></div>
-        <div class="btn" style="background: #a29bfe;" onclick="changeColor(0xa29bfe)"></div>
-        <div class="btn" style="background: #fab1a0;" onclick="changeColor(0fab1a0)"></div>
+        <div class="btn" style="background: #ff4d4d;" onclick="changeRoseColor('#ff4d4d')"></div>
+        <div class="btn" style="background: #74b9ff;" onclick="changeRoseColor('#74b9ff')"></div>
+        <div class="btn" style="background: #f8a5c2;" onclick="changeRoseColor('#f8a5c2')"></div>
+        <div class="btn" style="background: #f9ca24;" onclick="changeRoseColor('#f9ca24')"></div>
     </div>
 
     <script type="importmap">
@@ -59,7 +59,7 @@
 
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 10, 18);
+        camera.position.set(0, 10, 20);
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
@@ -69,100 +69,92 @@
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
 
-        // Luces ambientales cálidas
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
-        scene.add(ambientLight);
-        
-        const topLight = new THREE.PointLight(0xffffff, 200);
-        topLight.position.set(0, 15, 5);
-        scene.add(topLight);
+        // Iluminación cálida
+        scene.add(new THREE.AmbientLight(0xffffff, 1));
+        const pointLight = new THREE.PointLight(0xffffff, 10);
+        pointLight.position.set(5, 10, 5);
+        scene.add(pointLight);
 
         const flowerGroup = new THREE.Group();
         scene.add(flowerGroup);
 
-        // Datos de la rosa (Matriz 3D mejorada)
+        const blocks = [];
+        const geometry = new THREE.BoxGeometry(0.9, 0.9, 0.9);
+
+        // Coordenadas corregidas (X, Y, Z, esTallo)
         const voxels = [
             // Tallo
-            {x:0, y:0, z:0, isStem:true}, {x:0, y:1, z:0, isStem:true}, {x:0, y:2, z:0, isStem:true}, 
-            {x:1, y:2, z:0, isStem:true}, {x:0, y:3, z:0, isStem:true}, {x:0, y:4, z:0, isStem:true}, 
-            {x:-1, y:4, z:0, isStem:true}, {x:0, y:5, z:0, isStem:true},
-            // Pétalos (Capa base)
-            {x:0, y:6, z:0, isStem:false}, {x:1, y:6, z:0, isStem:false}, {x:-1, y:6, z:0, isStem:false}, 
-            {x:0, y:6, z:1, isStem:false}, {x:0, y:6, z:-1, isStem:false},
-            // Pétalos (Capa media)
-            {x:1, y:7, z:1, isStem:false}, {x:-1, y:7, z:-1, isStem:false}, {x:1, y:7, z:-1, isStem:false}, 
-            {x:-1, y:7, z:1, isStem:false}, {x:0, y:8, z:0, isStem:false},
-            // Grosor extra para que sea más 3D
-            {x:1, y:7, z:0, isStem:false}, {x:-1, y:7, z:0, isStem:false}, {x:0, y:7, z:1, isStem:false}, {x:0, y:7, z:-1, isStem:false}
+            [0,0,0, true], [0,1,0, true], [0,2,0, true], [1,2,0, true], 
+            [0,3,0, true], [0,4,0, true], [-1,4,0, true], [0,5,0, true],
+            // Pétalos - Base
+            [0,6,0, false], [1,6,0, false], [-1,6,0, false], [0,6,1, false], [0,6,-1,false],
+            // Pétalos - Cuerpo
+            [1,7,0, false], [-1,7,0, false], [0,7,1, false], [0,7,-1,false],
+            [1,7,1, false], [-1,7,-1,false], [1,7,-1,false], [-1,7,1, false],
+            // Top
+            [0,8,0, false]
         ];
 
-        const geometry = new THREE.BoxGeometry(1, 1, 1);
-        const blocks = [];
-
-        async function createRose() {
+        async function build() {
             for (let i = 0; i < voxels.length; i++) {
-                const v = voxels[i];
-                const color = v.isStem ? 0x44bd32 : 0xff4d4d;
+                const [x, y, z, isStem] = voxels[i];
+                const color = isStem ? 0x2ecc71 : 0xff4d4d;
                 
-                const material = new THREE.MeshStandardMaterial({ 
+                const mat = new THREE.MeshStandardMaterial({ 
                     color: color,
-                    emissive: v.isStem ? 0x000000 : color,
+                    emissive: isStem ? 0x000000 : color,
                     emissiveIntensity: 0,
-                    roughness: 0.2
+                    roughness: 0.3
                 });
 
-                const cube = new THREE.Mesh(geometry, material);
-                cube.position.set(v.x, v.y, v.z);
-                cube.scale.set(0,0,0);
+                const cube = new THREE.Mesh(geometry, mat);
+                cube.position.set(x, y, z);
+                cube.scale.set(0, 0, 0);
                 
-                // Guardamos un "offset" único para el brillo independiente
+                flowerGroup.add(cube);
                 blocks.push({
                     mesh: cube,
-                    isStem: v.isStem,
-                    offset: Math.random() * Math.PI * 2 
+                    isStem: isStem,
+                    offset: Math.random() * 10 // Offset para brillo independiente
                 });
 
-                flowerGroup.add(cube);
-
-                // Aparecer con delay
+                // Animación de aparición
                 setTimeout(() => {
                     let s = 0;
-                    const grow = setInterval(() => {
-                        s += 0.1;
-                        cube.scale.set(s,s,s);
-                        if(s >= 1) clearInterval(grow);
+                    const interval = setInterval(() => {
+                        s += 0.05;
+                        cube.scale.set(s, s, s);
+                        if (s >= 1) clearInterval(interval);
                     }, 20);
-                }, i * 80);
+                }, i * 50);
             }
         }
 
-        createRose();
+        build();
 
-        window.changeColor = (newHex) => {
+        // Función para cambiar color (ahora accesible globalmente)
+        window.changeRoseColor = (hex) => {
             blocks.forEach(b => {
-                if(!b.isStem) {
-                    b.mesh.material.color.setHex(newHex);
-                    b.mesh.material.emissive.setHex(newHex);
+                if (!b.isStem) {
+                    b.mesh.material.color.set(hex);
+                    b.mesh.material.emissive.set(hex);
                 }
             });
         };
 
         function animate(time) {
             requestAnimationFrame(animate);
-            const t = time * 0.002;
+            const t = time * 0.001;
 
-            // Rotación suave
-            flowerGroup.rotation.y += 0.008;
-            flowerGroup.position.y = Math.sin(t) * 0.3;
+            flowerGroup.rotation.y += 0.01;
+            flowerGroup.position.y = Math.sin(t) * 0.5;
 
-            // Brillo INDEPENDIENTE para cada bloque
+            // Brillo independiente
             blocks.forEach(b => {
-                if(!b.isStem) {
-                    // Cada bloque usa su propio offset para que el brillo no sea simultáneo
-                    const pulse = (Math.sin(t * 2 + b.offset) + 1) / 2; 
-                    b.mesh.material.emissiveIntensity = pulse * 1.5; 
-                    // Pequeño movimiento individual
-                    b.mesh.position.y += Math.sin(t * 3 + b.offset) * 0.002;
+                if (!b.isStem) {
+                    // Cada cubo brilla a su propio ritmo
+                    const pulse = (Math.sin(t * 3 + b.offset) + 1) / 2;
+                    b.mesh.material.emissiveIntensity = pulse * 2;
                 }
             });
 
