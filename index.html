@@ -7,6 +7,7 @@
     <style>
         body { 
             margin: 0; 
+            /* Atardecer cálido */
             background: linear-gradient(180deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%); 
             overflow: hidden; 
             font-family: 'Courier New', Courier, monospace; 
@@ -16,6 +17,7 @@
             top: 40px; width: 100%; text-align: center;
             color: #ffffff; text-shadow: 2px 2px 8px rgba(214, 45, 32, 0.5);
             font-size: 3.5rem; pointer-events: none; font-weight: bold;
+            letter-spacing: 5px;
         }
         #controls {
             position: absolute;
@@ -32,19 +34,17 @@
         }
         .btn:hover { transform: scale(1.3); }
 
-        /* Estilo para el botón de regenerar */
         .btn-refresh {
             background: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
-            color: #ff9a9e;
+            font-size: 24px;
+            color: #ff7675;
             border: none;
             font-weight: bold;
         }
         
-        /* Separador visual */
         .divider {
             width: 2px;
             height: 30px;
@@ -62,7 +62,7 @@
         <div class="btn" style="background: #f8a5c2;" onclick="changeRoseColor('#f8a5c2')"></div>
         <div class="btn" style="background: #f9ca24;" onclick="changeRoseColor('#f9ca24')"></div>
         <div class="divider"></div>
-        <div class="btn btn-refresh" onclick="regenerateFlower()">↻</div>
+        <div class="btn btn-refresh" onclick="regenerateFlower()" title="Regenerar flor">↻</div>
     </div>
 
     <script type="importmap">
@@ -79,8 +79,10 @@
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 8, 15);
+        
+        // Ajuste de Cámara: FOV de 60 para menos distorsión, y posición Z=20 para alejarla
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 6, 22); 
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
@@ -89,10 +91,12 @@
 
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
+        // El target en (0, 4, 0) centra la cámara en la mitad de la flor, no en el suelo
+        controls.target.set(0, 4, 0); 
 
         scene.add(new THREE.AmbientLight(0xffffff, 1.2));
         const pointLight = new THREE.PointLight(0xffffff, 15);
-        pointLight.position.set(5, 10, 5);
+        pointLight.position.set(10, 15, 10);
         scene.add(pointLight);
 
         const flowerGroup = new THREE.Group();
@@ -112,9 +116,12 @@
         ];
 
         async function build() {
-            // Limpiar flor anterior si existe
+            // Limpieza total antes de reconstruir
             while(flowerGroup.children.length > 0){ 
-                flowerGroup.remove(flowerGroup.children[0]); 
+                const obj = flowerGroup.children[0];
+                obj.geometry.dispose();
+                obj.material.dispose();
+                flowerGroup.remove(obj); 
             }
             blocks = [];
 
@@ -143,21 +150,20 @@
                 setTimeout(() => {
                     let s = 0;
                     const interval = setInterval(() => {
-                        s += 0.1; // Un poco más rápido el crecimiento
+                        s += 0.08; 
                         cube.scale.set(s, s, s);
                         if (s >= 1) {
-                            cube.scale.set(1,1,1);
+                            cube.scale.set(1, 1, 1);
                             clearInterval(interval);
                         }
                     }, 20);
-                }, i * 40);
+                }, i * 45);
             }
         }
 
-        // Ejecutar construcción inicial
         build();
 
-        // Funciones Globales
+        // Expuesto a window para los botones HTML
         window.changeRoseColor = (hex) => {
             currentColor = hex;
             blocks.forEach(b => {
@@ -177,8 +183,10 @@
             const t = time * 0.001;
 
             flowerGroup.rotation.y += 0.005;
+            // Flotación sutil
             flowerGroup.position.y = Math.sin(t) * 0.3;
 
+            // Pulso de brillo en los pétalos
             blocks.forEach(b => {
                 if (!b.isStem) {
                     const pulse = (Math.sin(t * 3 + b.offset) + 1) / 2;
